@@ -479,7 +479,7 @@ class Admin_Guide {
 	private function render_styles(): void {
 		?>
 		<style>
-		.geo-guide-wrap { max-width: 900px; }
+		.geo-guide-wrap { max-width: 100%; }
 		.geo-guide-content { margin-top: 20px; }
 
 		.geo-guide-card {
