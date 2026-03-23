@@ -1,0 +1,16 @@
+{
+    "name": "piensaenweb/geogastronomica",
+    "description": "Plugin WordPress de gestion de banners y anuncios publicitarios propios",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "autoload": {
+        "classmap": [
+            "includes/"
+        ]
+    },
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "minimum-stability": "stable"
+}

@@ -56,7 +56,7 @@
 
 | ID | Etiqueta | Titulo | Estado | Dependencias |
 |----|----------|--------|--------|--------------|
-| T-001 | [feature] | Scaffolding del plugin y estructura OOP | pendiente | ninguna |
+| T-001 | [feature] | Scaffolding del plugin y estructura OOP | revision | ninguna |
 | T-002 | [feature] | Registro del CPT geo_anuncio | pendiente | T-001 |
 | T-003 | [feature] | Meta boxes con tabs y todos los campos | pendiente | T-002 |
 
@@ -79,7 +79,7 @@
   - Crear: `uninstall.php` (placeholder)
 - **Sizing**: Archivos 2, Deps 1, Claridad alta, Riesgo bajo — Score: 5/12
 - **Dependencias**: ninguna
-- **Estado**: pendiente
+- **Estado**: revision
 - **Agentes**: developer → reviewer
 
 ---
