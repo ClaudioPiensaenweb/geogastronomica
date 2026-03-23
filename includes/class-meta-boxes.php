@@ -94,16 +94,6 @@ class Meta_Boxes {
 						'type'     => 'date',
 						'sanitize' => 'sanitize_text_field',
 					),
-					'_geo_home'           => array(
-						'label'    => esc_html__( 'Pagina de inicio', 'geogastronomica' ),
-						'type'     => 'checkbox',
-						'sanitize' => 'absint',
-					),
-					'_geo_todas_categorias' => array(
-						'label'    => esc_html__( 'Todas las categorias', 'geogastronomica' ),
-						'type'     => 'checkbox',
-						'sanitize' => 'absint',
-					),
 					'_geo_anuncio_home'   => array(
 						'label'    => esc_html__( 'Zonas en pagina de inicio', 'geogastronomica' ),
 						'type'     => 'zone_checkboxes',
@@ -122,12 +112,7 @@ class Meta_Boxes {
 						'options'  => array( 'vertical_1', 'vertical_2', 'vertical_3', 'horizontal_1' ),
 						'sanitize' => 'array_map_absint',
 					),
-					'_geo_prioridad'      => array(
-						'label'    => esc_html__( 'Prioridad', 'geogastronomica' ),
-						'type'     => 'number',
-						'sanitize' => 'absint',
 					),
-				),
 			),
 		);
 	}
@@ -288,74 +273,44 @@ class Meta_Boxes {
 		?>
 		<div id="geo-tab-config" class="geo-tab-content">
 
-			<!-- Fechas lado a lado -->
-			<div class="geo-dates-row">
-				<div class="geo-date-field">
-					<label for="_geo_fecha_comienzo"><?php esc_html_e( 'Fecha comienzo', 'geogastronomica' ); ?></label>
-					<input type="date" id="_geo_fecha_comienzo" name="_geo_fecha_comienzo"
-					       value="<?php echo esc_attr( get_post_meta( $pid, '_geo_fecha_comienzo', true ) ); ?>">
-				</div>
-				<div class="geo-date-field">
-					<label for="_geo_fecha_fin"><?php esc_html_e( 'Fecha fin', 'geogastronomica' ); ?></label>
-					<input type="date" id="_geo_fecha_fin" name="_geo_fecha_fin"
-					       value="<?php echo esc_attr( get_post_meta( $pid, '_geo_fecha_fin', true ) ); ?>">
+			<!-- Fechas -->
+			<div class="geo-section">
+				<div class="geo-section-title"><?php esc_html_e( 'Periodo de actividad', 'geogastronomica' ); ?></div>
+				<p class="geo-section-hint"><?php esc_html_e( 'Deja vacio para que el anuncio sea permanente.', 'geogastronomica' ); ?></p>
+				<div class="geo-dates-row">
+					<div class="geo-date-field">
+						<label for="_geo_fecha_comienzo"><?php esc_html_e( 'Desde', 'geogastronomica' ); ?></label>
+						<input type="date" id="_geo_fecha_comienzo" name="_geo_fecha_comienzo"
+						       value="<?php echo esc_attr( get_post_meta( $pid, '_geo_fecha_comienzo', true ) ); ?>">
+					</div>
+					<div class="geo-date-field">
+						<label for="_geo_fecha_fin"><?php esc_html_e( 'Hasta', 'geogastronomica' ); ?></label>
+						<input type="date" id="_geo_fecha_fin" name="_geo_fecha_fin"
+						       value="<?php echo esc_attr( get_post_meta( $pid, '_geo_fecha_fin', true ) ); ?>">
+					</div>
 				</div>
 			</div>
 
-			<!-- Toggles -->
-			<table class="form-table">
-				<tr>
-					<th><?php esc_html_e( 'Pagina de inicio', 'geogastronomica' ); ?></th>
-					<td>
-						<div class="geo-toggle-field">
-							<input type="checkbox" class="geo-toggle" id="_geo_home" name="_geo_home" value="1"
-								<?php checked( get_post_meta( $pid, '_geo_home', true ), '1' ); ?>>
-							<span class="geo-toggle-label"><?php esc_html_e( 'Mostrar en la home', 'geogastronomica' ); ?></span>
-						</div>
-					</td>
-				</tr>
-				<tr>
-					<th><?php esc_html_e( 'Todas las categorias', 'geogastronomica' ); ?></th>
-					<td>
-						<div class="geo-toggle-field">
-							<input type="checkbox" class="geo-toggle" id="_geo_todas_categorias" name="_geo_todas_categorias" value="1"
-								<?php checked( get_post_meta( $pid, '_geo_todas_categorias', true ), '1' ); ?>>
-							<span class="geo-toggle-label"><?php esc_html_e( 'Mostrar en todas las categorias', 'geogastronomica' ); ?></span>
-						</div>
-					</td>
-				</tr>
-			</table>
-
 			<!-- Zonas -->
-			<?php
-			$zone_fields = array(
-				'_geo_anuncio_home'         => $fields['_geo_anuncio_home'],
-				'_geo_anuncio_categoria'    => $fields['_geo_anuncio_categoria'],
-				'_geo_anuncio_subcategoria' => $fields['_geo_anuncio_subcategoria'],
-			);
-			foreach ( $zone_fields as $meta_key => $field ) :
-				$value = get_post_meta( $pid, $meta_key, true );
-				?>
-				<div class="geo-zone-group">
-					<div class="geo-zone-group-title"><?php echo esc_html( $field['label'] ); ?></div>
-					<?php $this->render_zone_checkboxes( $meta_key, $field, $value ); ?>
-				</div>
-			<?php endforeach; ?>
+			<div class="geo-section">
+				<div class="geo-section-title"><?php esc_html_e( 'Donde se muestra', 'geogastronomica' ); ?></div>
+				<p class="geo-section-hint"><?php esc_html_e( 'Selecciona en que zonas aparece este anuncio.', 'geogastronomica' ); ?></p>
+				<?php
+				$zone_fields = array(
+					'_geo_anuncio_home'         => $fields['_geo_anuncio_home'],
+					'_geo_anuncio_categoria'    => $fields['_geo_anuncio_categoria'],
+					'_geo_anuncio_subcategoria' => $fields['_geo_anuncio_subcategoria'],
+				);
+				foreach ( $zone_fields as $meta_key => $field ) :
+					$value = get_post_meta( $pid, $meta_key, true );
+					?>
+					<div class="geo-zone-group">
+						<div class="geo-zone-group-title"><?php echo esc_html( $field['label'] ); ?></div>
+						<?php $this->render_zone_checkboxes( $meta_key, $field, $value ); ?>
+					</div>
+				<?php endforeach; ?>
+			</div>
 
-			<!-- Prioridad -->
-			<table class="form-table">
-				<tr>
-					<th><label for="_geo_prioridad"><?php esc_html_e( 'Prioridad', 'geogastronomica' ); ?></label></th>
-					<td>
-						<div class="geo-priority-field">
-							<input type="number" id="_geo_prioridad" name="_geo_prioridad"
-							       value="<?php echo esc_attr( get_post_meta( $pid, '_geo_prioridad', true ) ); ?>"
-							       min="0" class="small-text">
-							<span class="geo-priority-hint"><?php esc_html_e( 'Mayor numero = mas prioridad', 'geogastronomica' ); ?></span>
-						</div>
-					</td>
-				</tr>
-			</table>
 		</div>
 		<?php
 	}
