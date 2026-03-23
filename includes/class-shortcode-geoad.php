@@ -261,10 +261,13 @@ class Shortcode_GeoAd {
 	}
 
 	/**
-	 * Renderizar elemento <picture> con sources responsive.
+	 * Renderizar elemento <picture> con source para movil.
+	 *
+	 * La zona determina el formato principal (vertical, horizontal, cuadrado).
+	 * En movil se muestra la imagen movil si existe, sino la del formato principal.
 	 *
 	 * @param int    $ad_id  ID del anuncio.
-	 * @param string $format Formato principal.
+	 * @param string $format Formato principal determinado por la zona.
 	 * @return string HTML del picture.
 	 */
 	private function render_picture( int $ad_id, string $format ): string {
@@ -275,36 +278,32 @@ class Shortcode_GeoAd {
 			'vertical'   => (int) get_post_meta( $ad_id, '_geo_imagen_vertical', true ),
 		);
 
-		// Fallback: si falta una imagen, usar la del formato principal.
-		$fallback_id = $images[ $format ] ?: $this->find_fallback_image( $images );
-		if ( ! $fallback_id ) {
+		// Imagen principal: la del formato de la zona.
+		$primary_id = $images[ $format ] ?: $this->find_fallback_image( $images );
+		if ( ! $primary_id ) {
 			return '';
 		}
 
-		$fallback_url = wp_get_attachment_image_url( $fallback_id, 'full' );
-		if ( ! $fallback_url ) {
+		$primary_url = wp_get_attachment_image_url( $primary_id, 'full' );
+		if ( ! $primary_url ) {
 			return '';
 		}
+
+		// Imagen movil: si existe, se usa como <source> para mobile.
+		$mobile_id  = $images['movil'] ?: $primary_id;
+		$mobile_url = wp_get_attachment_image_url( $mobile_id, 'full' );
+
+		$alt = esc_attr( get_post_meta( $ad_id, '_geo_descripcion', true ) );
 
 		ob_start();
 		?>
 		<picture>
-			<?php foreach ( self::BREAKPOINTS as $img_format => $media_query ) : ?>
-				<?php
-				if ( $img_format === $format ) {
-					continue; // El formato principal va en el <img> fallback.
-				}
-				$img_id = $images[ $img_format ] ?: $fallback_id;
-				$url    = wp_get_attachment_image_url( $img_id, 'full' );
-				if ( ! $url ) {
-					continue;
-				}
-				?>
-				<source media="<?php echo esc_attr( $media_query ); ?>"
-				        srcset="<?php echo esc_url( $url ); ?>">
-			<?php endforeach; ?>
-			<img src="<?php echo esc_url( $fallback_url ); ?>"
-			     alt="<?php echo esc_attr( get_post_meta( $ad_id, '_geo_descripcion', true ) ); ?>"
+			<?php if ( $mobile_url && $mobile_id !== $primary_id ) : ?>
+				<source media="(max-width: 767px)"
+				        srcset="<?php echo esc_url( $mobile_url ); ?>">
+			<?php endif; ?>
+			<img src="<?php echo esc_url( $primary_url ); ?>"
+			     alt="<?php echo $alt; ?>"
 			     loading="lazy"
 			     width="<?php echo esc_attr( $this->get_format_width( $format ) ); ?>"
 			     height="<?php echo esc_attr( $this->get_format_height( $format ) ); ?>">
