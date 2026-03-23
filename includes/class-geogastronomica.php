@@ -24,7 +24,7 @@ class GeoGastronomica {
 	/**
 	 * Version del plugin.
 	 */
-	public const VERSION = '1.1.0';
+	public const VERSION = '1.2.0';
 
 	/**
 	 * Prefijo para meta keys.
@@ -93,11 +93,17 @@ class GeoGastronomica {
 			return;
 		}
 
-		\YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
+		$update_checker = \YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
 			'https://github.com/ClaudioPiensaenweb/geogastronomica/',
 			GEO_PLUGIN_FILE,
 			'geogastronomica'
 		);
+
+		// Token para repos privados. Definir en wp-config.php:
+		// define( 'GEO_GITHUB_TOKEN', 'ghp_tu_token_aqui' );
+		if ( defined( 'GEO_GITHUB_TOKEN' ) && GEO_GITHUB_TOKEN ) {
+			$update_checker->setAuthentication( GEO_GITHUB_TOKEN );
+		}
 	}
 
 	/**

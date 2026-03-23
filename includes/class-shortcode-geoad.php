@@ -48,7 +48,6 @@ class Shortcode_GeoAd {
 	 */
 	private const ASPECT_RATIOS = array(
 		'vertical'   => '285 / 627',
-		'cuadrado'   => '285 / 285',
 		'horizontal' => '1230 / 350',
 		'movil'      => '1000 / 400',
 	);
@@ -273,7 +272,6 @@ class Shortcode_GeoAd {
 	private function render_picture( int $ad_id, string $format ): string {
 		$images = array(
 			'movil'      => (int) get_post_meta( $ad_id, '_geo_imagen_movil', true ),
-			'cuadrado'   => (int) get_post_meta( $ad_id, '_geo_imagen_cuadrado', true ),
 			'horizontal' => (int) get_post_meta( $ad_id, '_geo_imagen_horizontal', true ),
 			'vertical'   => (int) get_post_meta( $ad_id, '_geo_imagen_vertical', true ),
 		);
@@ -319,7 +317,7 @@ class Shortcode_GeoAd {
 	 * @return string Formato (vertical, horizontal, cuadrado, movil).
 	 */
 	private function detect_primary_format( string $slot ): string {
-		foreach ( array( 'vertical', 'horizontal', 'cuadrado' ) as $f ) {
+		foreach ( array( 'vertical', 'horizontal' ) as $f ) {
 			if ( str_starts_with( $slot, $f ) ) {
 				return $f;
 			}
@@ -351,7 +349,6 @@ class Shortcode_GeoAd {
 	private function get_format_width( string $format ): int {
 		return match ( $format ) {
 			'vertical'   => 285,
-			'cuadrado'   => 285,
 			'horizontal' => 1230,
 			'movil'      => 1000,
 			default      => 1230,
@@ -367,7 +364,6 @@ class Shortcode_GeoAd {
 	private function get_format_height( string $format ): int {
 		return match ( $format ) {
 			'vertical'   => 627,
-			'cuadrado'   => 285,
 			'horizontal' => 350,
 			'movil'      => 400,
 			default      => 350,

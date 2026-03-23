@@ -69,11 +69,6 @@ class Meta_Boxes {
 						'type'     => 'image',
 						'sanitize' => 'absint',
 					),
-					'_geo_imagen_cuadrado'   => array(
-						'label'    => esc_html__( 'Anuncio cuadrado (285x285)', 'geogastronomica' ),
-						'type'     => 'image',
-						'sanitize' => 'absint',
-					),
 					'_geo_imagen_horizontal' => array(
 						'label'    => esc_html__( 'Anuncio horizontal (1230x350)', 'geogastronomica' ),
 						'type'     => 'image',
@@ -112,13 +107,13 @@ class Meta_Boxes {
 					'_geo_anuncio_home'   => array(
 						'label'    => esc_html__( 'Zonas en pagina de inicio', 'geogastronomica' ),
 						'type'     => 'zone_checkboxes',
-						'options'  => array( 'vertical_1', 'horizontal_1', 'cuadrado_1', 'horizontal_2' ),
+						'options'  => array( 'vertical_1', 'horizontal_1', 'horizontal_2' ),
 						'sanitize' => 'array_map_absint',
 					),
 					'_geo_anuncio_categoria' => array(
 						'label'    => esc_html__( 'Zonas en pagina de categoria', 'geogastronomica' ),
 						'type'     => 'zone_checkboxes',
-						'options'  => array( 'vertical_1', 'horizontal_1', 'cuadrado_1', 'horizontal_2' ),
+						'options'  => array( 'vertical_1', 'horizontal_1', 'horizontal_2' ),
 						'sanitize' => 'array_map_absint',
 					),
 					'_geo_anuncio_subcategoria' => array(
@@ -248,7 +243,6 @@ class Meta_Boxes {
 				<?php
 				$image_fields = array(
 					'_geo_imagen_vertical'   => $fields['_geo_imagen_vertical'],
-					'_geo_imagen_cuadrado'   => $fields['_geo_imagen_cuadrado'],
 					'_geo_imagen_horizontal' => $fields['_geo_imagen_horizontal'],
 					'_geo_imagen_movil'      => $fields['_geo_imagen_movil'],
 				);
@@ -474,12 +468,11 @@ class Meta_Boxes {
 	private function render_zone_checkboxes( string $meta_key, array $field, mixed $value ): void {
 		$saved = is_array( $value ) ? $value : array();
 		$zone_labels = array(
-			'vertical_1'   => esc_html__( 'Anuncio Vertical 1', 'geogastronomica' ),
-			'vertical_2'   => esc_html__( 'Anuncio Vertical 2', 'geogastronomica' ),
-			'vertical_3'   => esc_html__( 'Anuncio Vertical 3', 'geogastronomica' ),
-			'horizontal_1' => esc_html__( 'Anuncio Horizontal 1', 'geogastronomica' ),
-			'horizontal_2' => esc_html__( 'Anuncio Horizontal 2', 'geogastronomica' ),
-			'cuadrado_1'   => esc_html__( 'Anuncio Cuadrado 1', 'geogastronomica' ),
+			'vertical_1'   => esc_html__( 'Vertical 1', 'geogastronomica' ),
+			'vertical_2'   => esc_html__( 'Vertical 2', 'geogastronomica' ),
+			'vertical_3'   => esc_html__( 'Vertical 3', 'geogastronomica' ),
+			'horizontal_1' => esc_html__( 'Horizontal 1', 'geogastronomica' ),
+			'horizontal_2' => esc_html__( 'Horizontal 2', 'geogastronomica' ),
 		);
 
 		echo '<div class="geo-zone-checkboxes">';
