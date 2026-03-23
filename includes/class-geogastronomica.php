@@ -24,7 +24,7 @@ class GeoGastronomica {
 	/**
 	 * Version del plugin.
 	 */
-	public const VERSION = '1.5.0';
+	public const VERSION = '1.6.0';
 
 	/**
 	 * Prefijo para meta keys.
@@ -101,10 +101,8 @@ class GeoGastronomica {
 			'geogastronomica'
 		);
 
-		$token = Settings::get_token();
-		if ( $token ) {
-			$update_checker->setAuthentication( $token );
-		}
+		// Repo publico — buscar release assets (ZIP adjunto).
+		$update_checker->getVcsApi()->enableReleaseAssets();
 	}
 
 	/**
