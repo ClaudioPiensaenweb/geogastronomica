@@ -114,7 +114,11 @@ class Shortcode_GeoAd {
 
 		$ads = $this->get_active_ads_cached( $zone );
 		if ( empty( $ads ) ) {
-			// Sin anuncios = cero impacto en el DOM.
+			// Debug: mostrar por que no hay anuncios.
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				$debug = $this->debug_zone( $zone );
+				return '<!-- geoad debug [' . esc_html( $zone ) . ']: ' . esc_html( $debug ) . ' -->';
+			}
 			return '';
 		}
 
@@ -241,6 +245,78 @@ class Shortcode_GeoAd {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Debug: diagnosticar por que una zona no muestra anuncios.
+	 *
+	 * @param string $zone Nombre de la zona.
+	 * @return string Diagnostico.
+	 */
+	private function debug_zone( string $zone ): string {
+		$parts = $this->parse_zone( $zone );
+		if ( ! $parts ) {
+			return 'zona invalida - no parsea (paginas validas: home, categoria, subcategoria)';
+		}
+
+		$meta_field = '_geo_anuncio_' . $parts['page'];
+		$slot       = $parts['slot'];
+
+		// 1. Hay anuncios publicados?
+		$all = get_posts( array(
+			'post_type'   => CPT_Anuncio::POST_TYPE,
+			'post_status' => 'any',
+			'numberposts' => -1,
+			'fields'      => 'ids',
+		) );
+		if ( empty( $all ) ) {
+			return 'no hay ningun anuncio creado (CPT: ' . CPT_Anuncio::POST_TYPE . ')';
+		}
+
+		$published = get_posts( array(
+			'post_type'   => CPT_Anuncio::POST_TYPE,
+			'post_status' => 'publish',
+			'numberposts' => -1,
+			'fields'      => 'ids',
+		) );
+		if ( empty( $published ) ) {
+			return count( $all ) . ' anuncios existen pero ninguno publicado';
+		}
+
+		// 2. Filtro de fechas.
+		$today       = current_time( 'Y-m-d' );
+		$date_passed = array();
+		foreach ( $published as $pid ) {
+			$inicio = get_post_meta( $pid, '_geo_fecha_comienzo', true );
+			$fin    = get_post_meta( $pid, '_geo_fecha_fin', true );
+			$ok     = true;
+			if ( $inicio && $inicio > $today ) {
+				$ok = false;
+			}
+			if ( $fin && $fin < $today ) {
+				$ok = false;
+			}
+			if ( $ok ) {
+				$date_passed[] = $pid;
+			}
+		}
+		if ( empty( $date_passed ) ) {
+			return count( $published ) . ' publicados pero todos fuera de fecha (hoy=' . $today . ')';
+		}
+
+		// 3. Filtro de zona.
+		$info = array();
+		foreach ( $date_passed as $pid ) {
+			$zones = get_post_meta( $pid, $meta_field, true );
+			$pack  = get_post_meta( $pid, '_geo_pack', true );
+			$info[] = 'ID=' . $pid
+				. ' pack=' . ( $pack ?: 'none' )
+				. ' meta[' . $meta_field . ']=' . ( is_array( $zones ) ? implode( ',', $zones ) : var_export( $zones, true ) )
+				. ' busco=' . $slot
+				. ' match=' . ( is_array( $zones ) && in_array( $slot, $zones, true ) ? 'SI' : 'NO' );
+		}
+
+		return count( $date_passed ) . ' activos, detalle: ' . implode( ' | ', $info );
 	}
 
 	/**
