@@ -62,7 +62,7 @@
 	.geoad-zone--vertical {
 		max-width: 100%;
 		aspect-ratio: 5 / 2;
-		max-height: 300px;
+		max-height: 250px;
 	}
 }
 
