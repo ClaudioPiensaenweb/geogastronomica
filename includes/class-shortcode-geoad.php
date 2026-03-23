@@ -60,6 +60,13 @@ class Shortcode_GeoAd {
 	public function init( ?Cache_Manager $cache = null ): void {
 		$this->cache = $cache;
 		add_shortcode( self::TAG, array( $this, 'render' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'register_assets' ) );
+	}
+
+	/**
+	 * Registrar assets en el hook correcto.
+	 */
+	public function register_assets(): void {
 		wp_register_style(
 			'geoad-frontend',
 			GEO_PLUGIN_URL . 'assets/css/geoad-frontend.css',
