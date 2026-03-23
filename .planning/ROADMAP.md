@@ -56,9 +56,9 @@
 
 | ID | Etiqueta | Titulo | Estado | Dependencias |
 |----|----------|--------|--------|--------------|
-| T-001 | [feature] | Scaffolding del plugin y estructura OOP | revision | ninguna |
-| T-002 | [feature] | Registro del CPT geo_anuncio | revision | T-001 |
-| T-003 | [feature] | Meta boxes con tabs y todos los campos | revision | T-002 |
+| T-001 | [feature] | Scaffolding del plugin y estructura OOP | completada | ninguna |
+| T-002 | [feature] | Registro del CPT geo_anuncio | completada | T-001 |
+| T-003 | [feature] | Meta boxes con tabs y todos los campos | completada | T-002 |
 
 ---
 
@@ -136,9 +136,9 @@
 
 | ID | Etiqueta | Titulo | Estado | Dependencias |
 |----|----------|--------|--------|--------------|
-| T-004 | [feature] | Shortcode de zona con renderizado responsive y lazy loading | revision | T-003 |
-| T-005 | [feature] | Rotacion JS con transicion fade y cache de consultas | revision | T-004 |
-| T-006 | [feature] | Caducidad automatica y filtrado por fechas | revision | T-004 |
+| T-004 | [feature] | Shortcode de zona con renderizado responsive y lazy loading | completada | T-003 |
+| T-005 | [feature] | Rotacion JS con transicion fade y cache de consultas | completada | T-004 |
+| T-006 | [feature] | Caducidad automatica y filtrado por fechas | completada | T-004 |
 
 ---
 
@@ -225,8 +225,8 @@
 
 | ID | Etiqueta | Titulo | Estado | Dependencias |
 |----|----------|--------|--------|--------------|
-| T-007 | [feature] | Columnas admin personalizadas y acciones en lote | revision | T-003 |
-| T-008 | [feature] | Estadisticas de impresiones y clicks | revision | T-005 |
+| T-007 | [feature] | Columnas admin personalizadas y acciones en lote | completada | T-003 |
+| T-008 | [feature] | Estadisticas de impresiones y clicks | completada | T-005 |
 
 ---
 
@@ -286,10 +286,10 @@
 
 | ID | Etiqueta | Titulo | Estado | Dependencias |
 |----|----------|--------|--------|--------------|
-| T-009 | [seguridad] | Hardening de seguridad en 4 capas | revision | T-003, T-008 |
-| T-010 | [feature] | Internacionalizacion i18n completa | revision | T-003 |
-| T-011 | [feature] | Sistema de actualizaciones desde GitHub | revision | T-001 |
-| T-012 | [feature] | Uninstall limpio y desactivacion segura | revision | T-008 |
+| T-009 | [seguridad] | Hardening de seguridad en 4 capas | completada | T-003, T-008 |
+| T-010 | [feature] | Internacionalizacion i18n completa | completada | T-003 |
+| T-011 | [feature] | Sistema de actualizaciones desde GitHub | completada | T-001 |
+| T-012 | [feature] | Uninstall limpio y desactivacion segura | completada | T-008 |
 
 ---
 
