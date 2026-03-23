@@ -59,7 +59,16 @@ class GeoGastronomica {
 	 * Registrar hooks de WordPress.
 	 */
 	private function init_hooks(): void {
+		$this->init_components();
 		add_action( 'init', array( $this, 'load_textdomain' ) );
+	}
+
+	/**
+	 * Inicializar componentes del plugin.
+	 */
+	private function init_components(): void {
+		( new CPT_Anuncio() )->init();
+		( new Meta_Boxes() )->init();
 	}
 
 	/**

@@ -57,8 +57,8 @@
 | ID | Etiqueta | Titulo | Estado | Dependencias |
 |----|----------|--------|--------|--------------|
 | T-001 | [feature] | Scaffolding del plugin y estructura OOP | revision | ninguna |
-| T-002 | [feature] | Registro del CPT geo_anuncio | pendiente | T-001 |
-| T-003 | [feature] | Meta boxes con tabs y todos los campos | pendiente | T-002 |
+| T-002 | [feature] | Registro del CPT geo_anuncio | revision | T-001 |
+| T-003 | [feature] | Meta boxes con tabs y todos los campos | revision | T-002 |
 
 ---
 
