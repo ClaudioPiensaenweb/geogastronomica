@@ -54,12 +54,15 @@
 
 /* Movil: ancho completo, alto proporcional a 1000x400 (ratio 5:2) */
 @media (max-width: 767px) {
-	.geoad-zone--vertical,
 	.geoad-zone--horizontal {
 		max-width: 100%;
 		aspect-ratio: 5 / 2;
-		max-height: none;
-		min-height: unset;
+	}
+
+	.geoad-zone--vertical {
+		max-width: 100%;
+		aspect-ratio: 5 / 2;
+		max-height: 300px;
 	}
 }
 
