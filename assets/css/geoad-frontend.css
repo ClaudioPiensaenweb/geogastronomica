@@ -40,28 +40,30 @@
 	opacity: 1;
 }
 
-/* Formato vertical */
+/* Formato vertical — desktop */
 .geoad-zone--vertical {
 	max-width: 285px;
 	aspect-ratio: 285 / 627;
 }
 
-/* Formato cuadrado */
-.geoad-zone--cuadrado {
-	max-width: 285px;
-	aspect-ratio: 1 / 1;
-}
-
-/* Formato horizontal */
+/* Formato horizontal — desktop */
 .geoad-zone--horizontal {
 	max-width: 1230px;
 	aspect-ratio: 1230 / 350;
 }
 
-/* Formato movil — solo visible en mobile */
-.geoad-zone--movil {
-	max-width: 1000px;
-	aspect-ratio: 1000 / 400;
+/* Movil: todos los banners se adaptan al ancho completo con aspect-ratio movil */
+@media (max-width: 767px) {
+	.geoad-zone--vertical,
+	.geoad-zone--horizontal {
+		max-width: 100%;
+		aspect-ratio: 1000 / 400;
+	}
+}
+
+/* Shortcode vacio no ocupa espacio en la grid */
+.brxe-shortcode:empty {
+	display: none !important;
 }
 
 /* Links dentro de banners */
