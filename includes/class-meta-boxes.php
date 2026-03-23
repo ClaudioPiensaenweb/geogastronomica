@@ -161,7 +161,16 @@ class Meta_Boxes {
 	}
 
 	/**
-	 * Renderizar meta box con tabs.
+	 * Iconos dashicons por tab.
+	 */
+	private const TAB_ICONS = array(
+		'empresa' => 'dashicons-building',
+		'anuncio' => 'dashicons-format-image',
+		'config'  => 'dashicons-admin-generic',
+	);
+
+	/**
+	 * Renderizar meta box con tabs modernos.
 	 *
 	 * @param \WP_Post $post Post actual.
 	 */
@@ -178,6 +187,7 @@ class Meta_Boxes {
 						<a href="#geo-tab-<?php echo esc_attr( $tab_id ); ?>"
 						   class="geo-tab-link <?php echo $first ? 'active' : ''; ?>"
 						   data-tab="<?php echo esc_attr( $tab_id ); ?>">
+							<span class="dashicons <?php echo esc_attr( self::TAB_ICONS[ $tab_id ] ?? '' ); ?>"></span>
 							<?php echo esc_html( $tab['label'] ); ?>
 						</a>
 					</li>
@@ -185,27 +195,173 @@ class Meta_Boxes {
 				<?php endforeach; ?>
 			</ul>
 
-			<?php $first = true; ?>
-			<?php foreach ( $tabs as $tab_id => $tab ) : ?>
-				<div id="geo-tab-<?php echo esc_attr( $tab_id ); ?>"
-				     class="geo-tab-content <?php echo $first ? 'active' : ''; ?>">
-					<table class="form-table">
-						<?php foreach ( $tab['fields'] as $meta_key => $field ) : ?>
-							<tr>
-								<th>
-									<label for="<?php echo esc_attr( $meta_key ); ?>">
-										<?php echo esc_html( $field['label'] ); ?>
-									</label>
-								</th>
-								<td>
-									<?php $this->render_field( $meta_key, $field, $post->ID ); ?>
-								</td>
-							</tr>
-						<?php endforeach; ?>
-					</table>
+			<?php $this->render_tab_empresa( $post ); ?>
+			<?php $this->render_tab_anuncio( $post ); ?>
+			<?php $this->render_tab_config( $post ); ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Renderizar tab Info Empresa.
+	 *
+	 * @param \WP_Post $post Post actual.
+	 */
+	private function render_tab_empresa( \WP_Post $post ): void {
+		$tabs = $this->get_tabs();
+		?>
+		<div id="geo-tab-empresa" class="geo-tab-content active">
+			<table class="form-table">
+				<?php foreach ( $tabs['empresa']['fields'] as $meta_key => $field ) : ?>
+					<tr>
+						<th><label for="<?php echo esc_attr( $meta_key ); ?>"><?php echo esc_html( $field['label'] ); ?></label></th>
+						<td><?php $this->render_field( $meta_key, $field, $post->ID ); ?></td>
+					</tr>
+				<?php endforeach; ?>
+			</table>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Renderizar tab Anuncio con grid de imagenes.
+	 *
+	 * @param \WP_Post $post Post actual.
+	 */
+	private function render_tab_anuncio( \WP_Post $post ): void {
+		$tabs = $this->get_tabs();
+		$fields = $tabs['anuncio']['fields'];
+		?>
+		<div id="geo-tab-anuncio" class="geo-tab-content">
+			<table class="form-table">
+				<tr>
+					<th><label for="_geo_descripcion"><?php echo esc_html( $fields['_geo_descripcion']['label'] ); ?></label></th>
+					<td><?php $this->render_field( '_geo_descripcion', $fields['_geo_descripcion'], $post->ID ); ?></td>
+				</tr>
+				<tr>
+					<th><label for="_geo_enlace"><?php echo esc_html( $fields['_geo_enlace']['label'] ); ?></label></th>
+					<td><?php $this->render_field( '_geo_enlace', $fields['_geo_enlace'], $post->ID ); ?></td>
+				</tr>
+			</table>
+
+			<div class="geo-images-grid">
+				<?php
+				$image_fields = array(
+					'_geo_imagen_vertical'   => $fields['_geo_imagen_vertical'],
+					'_geo_imagen_cuadrado'   => $fields['_geo_imagen_cuadrado'],
+					'_geo_imagen_horizontal' => $fields['_geo_imagen_horizontal'],
+					'_geo_imagen_movil'      => $fields['_geo_imagen_movil'],
+				);
+				foreach ( $image_fields as $meta_key => $field ) :
+					$value = get_post_meta( $post->ID, $meta_key, true );
+					$image_url = $value ? wp_get_attachment_image_url( (int) $value, 'medium' ) : '';
+					?>
+					<div class="geo-image-card">
+						<div class="geo-image-card-title"><?php echo esc_html( $field['label'] ); ?></div>
+						<div class="geo-image-field" data-field="<?php echo esc_attr( $meta_key ); ?>">
+							<input type="hidden" name="<?php echo esc_attr( $meta_key ); ?>"
+							       value="<?php echo esc_attr( $value ); ?>" class="geo-image-id">
+							<div class="geo-image-preview">
+								<?php if ( $image_url ) : ?>
+									<img src="<?php echo esc_url( $image_url ); ?>" alt="">
+								<?php endif; ?>
+							</div>
+							<div class="geo-image-buttons">
+								<button type="button" class="button geo-upload-btn">
+									<?php esc_html_e( 'Seleccionar', 'geogastronomica' ); ?>
+								</button>
+								<button type="button" class="button geo-remove-btn" <?php echo $value ? '' : 'style="display:none"'; ?>>
+									<?php esc_html_e( 'Eliminar', 'geogastronomica' ); ?>
+								</button>
+							</div>
+						</div>
+					</div>
+				<?php endforeach; ?>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Renderizar tab Configuracion con layout moderno.
+	 *
+	 * @param \WP_Post $post Post actual.
+	 */
+	private function render_tab_config( \WP_Post $post ): void {
+		$tabs   = $this->get_tabs();
+		$fields = $tabs['config']['fields'];
+		$pid    = $post->ID;
+		?>
+		<div id="geo-tab-config" class="geo-tab-content">
+
+			<!-- Fechas lado a lado -->
+			<div class="geo-dates-row">
+				<div class="geo-date-field">
+					<label for="_geo_fecha_comienzo"><?php esc_html_e( 'Fecha comienzo', 'geogastronomica' ); ?></label>
+					<input type="date" id="_geo_fecha_comienzo" name="_geo_fecha_comienzo"
+					       value="<?php echo esc_attr( get_post_meta( $pid, '_geo_fecha_comienzo', true ) ); ?>">
 				</div>
-				<?php $first = false; ?>
+				<div class="geo-date-field">
+					<label for="_geo_fecha_fin"><?php esc_html_e( 'Fecha fin', 'geogastronomica' ); ?></label>
+					<input type="date" id="_geo_fecha_fin" name="_geo_fecha_fin"
+					       value="<?php echo esc_attr( get_post_meta( $pid, '_geo_fecha_fin', true ) ); ?>">
+				</div>
+			</div>
+
+			<!-- Toggles -->
+			<table class="form-table">
+				<tr>
+					<th><?php esc_html_e( 'Pagina de inicio', 'geogastronomica' ); ?></th>
+					<td>
+						<div class="geo-toggle-field">
+							<input type="checkbox" class="geo-toggle" id="_geo_home" name="_geo_home" value="1"
+								<?php checked( get_post_meta( $pid, '_geo_home', true ), '1' ); ?>>
+							<span class="geo-toggle-label"><?php esc_html_e( 'Mostrar en la home', 'geogastronomica' ); ?></span>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<th><?php esc_html_e( 'Todas las categorias', 'geogastronomica' ); ?></th>
+					<td>
+						<div class="geo-toggle-field">
+							<input type="checkbox" class="geo-toggle" id="_geo_todas_categorias" name="_geo_todas_categorias" value="1"
+								<?php checked( get_post_meta( $pid, '_geo_todas_categorias', true ), '1' ); ?>>
+							<span class="geo-toggle-label"><?php esc_html_e( 'Mostrar en todas las categorias', 'geogastronomica' ); ?></span>
+						</div>
+					</td>
+				</tr>
+			</table>
+
+			<!-- Zonas -->
+			<?php
+			$zone_fields = array(
+				'_geo_anuncio_home'         => $fields['_geo_anuncio_home'],
+				'_geo_anuncio_categoria'    => $fields['_geo_anuncio_categoria'],
+				'_geo_anuncio_subcategoria' => $fields['_geo_anuncio_subcategoria'],
+			);
+			foreach ( $zone_fields as $meta_key => $field ) :
+				$value = get_post_meta( $pid, $meta_key, true );
+				?>
+				<div class="geo-zone-group">
+					<div class="geo-zone-group-title"><?php echo esc_html( $field['label'] ); ?></div>
+					<?php $this->render_zone_checkboxes( $meta_key, $field, $value ); ?>
+				</div>
 			<?php endforeach; ?>
+
+			<!-- Prioridad -->
+			<table class="form-table">
+				<tr>
+					<th><label for="_geo_prioridad"><?php esc_html_e( 'Prioridad', 'geogastronomica' ); ?></label></th>
+					<td>
+						<div class="geo-priority-field">
+							<input type="number" id="_geo_prioridad" name="_geo_prioridad"
+							       value="<?php echo esc_attr( get_post_meta( $pid, '_geo_prioridad', true ) ); ?>"
+							       min="0" class="small-text">
+							<span class="geo-priority-hint"><?php esc_html_e( 'Mayor numero = mas prioridad', 'geogastronomica' ); ?></span>
+						</div>
+					</td>
+				</tr>
+			</table>
 		</div>
 		<?php
 	}
@@ -280,7 +436,7 @@ class Meta_Boxes {
 	}
 
 	/**
-	 * Renderizar campo de imagen con Media Library picker.
+	 * Renderizar campo de imagen con Media Library picker (usado en render generico).
 	 *
 	 * @param string $meta_key     Key del meta.
 	 * @param mixed  $attachment_id ID del attachment.
@@ -296,12 +452,14 @@ class Meta_Boxes {
 					<img src="<?php echo esc_url( $image_url ); ?>" alt="">
 				<?php endif; ?>
 			</div>
-			<button type="button" class="button geo-upload-btn">
-				<?php esc_html_e( 'Seleccionar imagen', 'geogastronomica' ); ?>
-			</button>
-			<button type="button" class="button geo-remove-btn" <?php echo $attachment_id ? '' : 'style="display:none"'; ?>>
-				<?php esc_html_e( 'Eliminar', 'geogastronomica' ); ?>
-			</button>
+			<div class="geo-image-buttons">
+				<button type="button" class="button geo-upload-btn">
+					<?php esc_html_e( 'Seleccionar', 'geogastronomica' ); ?>
+				</button>
+				<button type="button" class="button geo-remove-btn" <?php echo $attachment_id ? '' : 'style="display:none"'; ?>>
+					<?php esc_html_e( 'Eliminar', 'geogastronomica' ); ?>
+				</button>
+			</div>
 		</div>
 		<?php
 	}
