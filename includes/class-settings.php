@@ -34,7 +34,7 @@ class Settings {
 	 */
 	public const AVAILABLE_ZONES = array(
 		'home'          => array( 'vertical_1', 'horizontal_1', 'horizontal_2' ),
-		'categoria'     => array( 'vertical_1', 'horizontal_1', 'horizontal_2' ),
+		'categoria'     => array( 'horizontal_1', 'horizontal_2' ),
 		'subcategoria'  => array( 'vertical_1', 'vertical_2', 'vertical_3', 'horizontal_1' ),
 	);
 
@@ -102,19 +102,19 @@ class Settings {
 		return array(
 			'basico' => array(
 				'name'  => 'Basico',
-				'price' => '200',
+				'price' => '150',
 				'zones' => array(
-					'home'         => array( 'vertical_1' ),
-					'categoria'    => array( 'vertical_1' ),
+					'home'         => array(),
+					'categoria'    => array(),
 					'subcategoria' => array( 'vertical_1' ),
 				),
 			),
-			'avanzado' => array(
-				'name'  => 'Avanzado',
-				'price' => '350',
+			'estandar' => array(
+				'name'  => 'Estandar',
+				'price' => '300',
 				'zones' => array(
-					'home'         => array( 'vertical_1', 'horizontal_1' ),
-					'categoria'    => array( 'vertical_1', 'horizontal_1' ),
+					'home'         => array( 'vertical_1' ),
+					'categoria'    => array( 'horizontal_1' ),
 					'subcategoria' => array( 'vertical_1', 'vertical_2', 'horizontal_1' ),
 				),
 			),
@@ -123,7 +123,7 @@ class Settings {
 				'price' => '500',
 				'zones' => array(
 					'home'         => array( 'vertical_1', 'horizontal_1', 'horizontal_2' ),
-					'categoria'    => array( 'vertical_1', 'horizontal_1', 'horizontal_2' ),
+					'categoria'    => array( 'horizontal_1', 'horizontal_2' ),
 					'subcategoria' => array( 'vertical_1', 'vertical_2', 'vertical_3', 'horizontal_1' ),
 				),
 			),

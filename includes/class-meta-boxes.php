@@ -103,7 +103,7 @@ class Meta_Boxes {
 					'_geo_anuncio_categoria' => array(
 						'label'    => esc_html__( 'Zonas en pagina de categoria', 'geogastronomica' ),
 						'type'     => 'zone_checkboxes',
-						'options'  => array( 'vertical_1', 'horizontal_1', 'horizontal_2' ),
+						'options'  => array( 'horizontal_1', 'horizontal_2' ),
 						'sanitize' => 'array_map_absint',
 					),
 					'_geo_anuncio_subcategoria' => array(

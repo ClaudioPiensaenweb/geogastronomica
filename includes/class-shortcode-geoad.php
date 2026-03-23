@@ -45,9 +45,8 @@ class Shortcode_GeoAd {
 	 */
 	private const BREAKPOINTS = array(
 		'movil'      => '(max-width: 767px)',
-		'cuadrado'   => '(max-width: 1023px)',
-		'horizontal' => '(min-width: 1024px)',
-		'vertical'   => '(min-width: 1024px)',
+		'horizontal' => '(min-width: 768px)',
+		'vertical'   => '(min-width: 768px)',
 	);
 
 	/**
@@ -181,41 +180,23 @@ class Shortcode_GeoAd {
 			'fields'         => 'ids',
 			'orderby'        => 'menu_order',
 			'order'          => 'ASC',
-			'meta_query'     => array(
-				'relation' => 'AND',
-				array(
-					'relation' => 'OR',
-					array(
-						'key'     => '_geo_fecha_comienzo',
-						'value'   => $today,
-						'compare' => '<=',
-						'type'    => 'DATE',
-					),
-					array(
-						'key'     => '_geo_fecha_comienzo',
-						'compare' => 'NOT EXISTS',
-					),
-				),
-				array(
-					'relation' => 'OR',
-					array(
-						'key'     => '_geo_fecha_fin',
-						'value'   => $today,
-						'compare' => '>=',
-						'type'    => 'DATE',
-					),
-					array(
-						'key'     => '_geo_fecha_fin',
-						'compare' => 'NOT EXISTS',
-					),
-				),
-			),
 		);
 
 		$query  = new \WP_Query( $args );
 		$result = array();
 
 		foreach ( $query->posts as $post_id ) {
+			// Filtrar por fechas en PHP (mas robusto que meta_query con strings vacios).
+			$inicio = get_post_meta( $post_id, '_geo_fecha_comienzo', true );
+			$fin    = get_post_meta( $post_id, '_geo_fecha_fin', true );
+			if ( $inicio && $inicio > $today ) {
+				continue;
+			}
+			if ( $fin && $fin < $today ) {
+				continue;
+			}
+
+			// Filtrar por zona.
 			$zones = get_post_meta( $post_id, $meta_field, true );
 			if ( is_array( $zones ) && in_array( $slot, $zones, true ) ) {
 				$result[] = $post_id;
@@ -379,15 +360,25 @@ class Shortcode_GeoAd {
 			'vertical'   => (int) get_post_meta( $ad_id, '_geo_imagen_vertical', true ),
 		);
 
+		// Debug temporal.
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			$debug = 'render_picture ID=' . $ad_id . ' format=' . $format
+				. ' imgs=[v=' . $images['vertical'] . ',h=' . $images['horizontal'] . ',m=' . $images['movil'] . ']';
+		}
+
 		// Imagen principal: la del formato de la zona.
 		$primary_id = $images[ $format ] ?: $this->find_fallback_image( $images );
 		if ( ! $primary_id ) {
-			return '';
+			return defined( 'WP_DEBUG' ) && WP_DEBUG
+				? '<!-- geoad: ' . esc_html( $debug ) . ' primary_id=0 -->'
+				: '';
 		}
 
 		$primary_url = wp_get_attachment_image_url( $primary_id, 'full' );
 		if ( ! $primary_url ) {
-			return '';
+			return defined( 'WP_DEBUG' ) && WP_DEBUG
+				? '<!-- geoad: ' . esc_html( $debug ) . ' primary_id=' . $primary_id . ' url=NULL -->'
+				: '';
 		}
 
 		// Imagen movil: si existe, se usa como <source> para mobile.
