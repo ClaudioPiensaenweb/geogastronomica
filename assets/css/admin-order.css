@@ -1,14 +1,65 @@
 /**
- * Admin Order — Drag & drop styles.
+ * Admin Order — Drag & drop styles con tabs por zona.
  *
  * @package GeoGastronomica
  */
 
+/* Tabs de zonas */
+.geo-order-tabs {
+	margin-bottom: 0 !important;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2px;
+}
+
+.geo-order-tabs .nav-tab {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12px;
+	padding: 6px 12px;
+	white-space: nowrap;
+}
+
+.geo-tab-count {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 20px;
+	height: 20px;
+	padding: 0 6px;
+	border-radius: 10px;
+	font-size: 11px;
+	font-weight: 700;
+	background: #f0f0f1;
+	color: #50575e;
+}
+
+.nav-tab-active .geo-tab-count {
+	background: #2271b1;
+	color: #fff;
+}
+
+.geo-tab-vertical { border-left: 3px solid #2271b1; }
+.geo-tab-horizontal { border-left: 3px solid #00a32a; }
+.geo-tab-vertical.nav-tab-active { border-left-color: #2271b1; }
+.geo-tab-horizontal.nav-tab-active { border-left-color: #00a32a; }
+
+/* Panel */
+.geo-order-panel {
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-top: none;
+	border-radius: 0 0 4px 4px;
+	padding: 20px;
+	max-width: 900px;
+}
+
+/* Lista */
 .geo-order-list {
 	list-style: none;
-	margin: 20px 0;
+	margin: 0;
 	padding: 0;
-	max-width: 800px;
 }
 
 .geo-order-item {
@@ -95,6 +146,80 @@
 	margin-top: 2px;
 }
 
+/* Pack tag */
+.geo-order-pack-tag {
+	display: inline-block;
+	padding: 3px 10px;
+	background: #f0f6fc;
+	border: 1px solid #c5d9ed;
+	border-radius: 3px;
+	font-size: 11px;
+	font-weight: 600;
+	color: #2271b1;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+/* Fecha */
+.geo-order-date {
+	font-size: 12px;
+	color: #8c8f94;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+.geo-order-date-expired {
+	color: #cc1818;
+}
+
+/* Badge caducado */
+.geo-order-badge {
+	padding: 3px 10px;
+	border-radius: 3px;
+	font-size: 11px;
+	font-weight: 600;
+	flex-shrink: 0;
+}
+
+.geo-order-badge.caducado {
+	background: #fcf0f1;
+	color: #cc1818;
+	border: 1px solid #f0c8c8;
+}
+
+/* Editar link */
+.geo-order-edit {
+	color: #c3c4c7;
+	text-decoration: none;
+	flex-shrink: 0;
+}
+.geo-order-edit:hover {
+	color: #2271b1;
+}
+.geo-order-edit .dashicons {
+	font-size: 18px;
+	width: 18px;
+	height: 18px;
+}
+
+/* Empty state */
+.geo-order-empty {
+	text-align: center;
+	padding: 40px 20px;
+	color: #8c8f94;
+}
+.geo-order-empty .dashicons {
+	font-size: 48px;
+	width: 48px;
+	height: 48px;
+	margin-bottom: 12px;
+	color: #c3c4c7;
+}
+.geo-order-empty p {
+	font-size: 14px;
+	margin: 0;
+}
+
+/* Zone tags (legacy, por si se usan en otro sitio) */
 .geo-order-zones {
 	display: flex;
 	flex-wrap: wrap;
@@ -110,18 +235,4 @@
 	font-size: 11px;
 	color: #2271b1;
 	white-space: nowrap;
-}
-
-.geo-order-badge {
-	padding: 3px 10px;
-	border-radius: 3px;
-	font-size: 11px;
-	font-weight: 600;
-	flex-shrink: 0;
-}
-
-.geo-order-badge.caducado {
-	background: #fcf0f1;
-	color: #cc1818;
-	border: 1px solid #f0c8c8;
 }
