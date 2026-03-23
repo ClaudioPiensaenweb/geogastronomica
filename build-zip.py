@@ -38,4 +38,4 @@ with zipfile.ZipFile(OUT, "w", zipfile.ZIP_DEFLATED) as zf:
         zf.write(path, arcname)
         print(f"  + {arcname}")
 
-print(f"\n✅ {OUT.name} ({OUT.stat().st_size // 1024} KB)")
+print(f"\nOK {OUT.name} ({OUT.stat().st_size // 1024} KB)")
