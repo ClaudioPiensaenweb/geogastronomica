@@ -24,7 +24,7 @@ class GeoGastronomica {
 	/**
 	 * Version del plugin.
 	 */
-	public const VERSION = '1.2.0';
+	public const VERSION = '1.3.0';
 
 	/**
 	 * Prefijo para meta keys.
@@ -81,6 +81,7 @@ class GeoGastronomica {
 		$stats->init();
 
 		( new REST_Stats( $stats ) )->init();
+		( new Settings() )->init();
 
 		$this->init_update_checker();
 	}
@@ -99,10 +100,9 @@ class GeoGastronomica {
 			'geogastronomica'
 		);
 
-		// Token para repos privados. Definir en wp-config.php:
-		// define( 'GEO_GITHUB_TOKEN', 'ghp_tu_token_aqui' );
-		if ( defined( 'GEO_GITHUB_TOKEN' ) && GEO_GITHUB_TOKEN ) {
-			$update_checker->setAuthentication( GEO_GITHUB_TOKEN );
+		$token = Settings::get_token();
+		if ( $token ) {
+			$update_checker->setAuthentication( $token );
 		}
 	}
 
