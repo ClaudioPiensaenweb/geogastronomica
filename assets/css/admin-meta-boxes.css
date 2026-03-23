@@ -119,6 +119,32 @@
 	outline: none;
 }
 
+/* ── Sections ── */
+.geo-section {
+	margin-bottom: 28px;
+	padding-bottom: 24px;
+	border-bottom: 1px solid #f0f0f1;
+}
+
+.geo-section:last-child {
+	border-bottom: none;
+	margin-bottom: 0;
+	padding-bottom: 0;
+}
+
+.geo-section-title {
+	font-size: 14px;
+	font-weight: 600;
+	color: #1d2327;
+	margin-bottom: 4px;
+}
+
+.geo-section-hint {
+	font-size: 12px;
+	color: #8c8f94;
+	margin: 0 0 14px 0;
+}
+
 /* ── Dates side by side ── */
 .geo-dates-row {
 	display: flex;
@@ -128,15 +154,14 @@
 
 .geo-date-field {
 	flex: 1;
+	max-width: 250px;
 }
 
 .geo-date-field label {
 	display: block;
 	font-weight: 500;
 	color: #50575e;
-	font-size: 12px;
-	text-transform: uppercase;
-	letter-spacing: 0.5px;
+	font-size: 13px;
 	margin-bottom: 6px;
 }
 
@@ -146,6 +171,13 @@
 	border: 1px solid #c3c4c7;
 	border-radius: 4px;
 	font-size: 14px;
+	transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.geo-date-field input[type="date"]:focus {
+	border-color: #2271b1;
+	box-shadow: 0 0 0 1px #2271b1;
+	outline: none;
 }
 
 /* ── Image fields ── */

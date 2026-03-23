@@ -147,9 +147,8 @@ class Shortcode_GeoAd {
 			'posts_per_page' => -1,
 			'no_found_rows'  => true,
 			'fields'         => 'ids',
-			'orderby'        => 'meta_value_num',
-			'meta_key'       => '_geo_prioridad',
-			'order'          => 'DESC',
+			'orderby'        => 'menu_order',
+			'order'          => 'ASC',
 			'meta_query'     => array(
 				'relation' => 'AND',
 				array(
