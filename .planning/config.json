@@ -1,0 +1,72 @@
+{
+  "plugin": "piensa",
+  "version": "1.0.0",
+  "currentMode": null,
+  "erp": {
+    "url": "https://ssot.piensaenweb.com/api",
+    "token": ""
+  },
+  "workflow": {
+    "research": true,
+    "reviewer": true,
+    "autoEstado": true,
+    "hookContextMonitor": true,
+    "hookCheckUpdate": true,
+    "modelEscalation": true
+  },
+  "models": {
+    "default": "sonnet",
+    "escalated": "opus",
+    "escalation_criteria": {
+      "sizing_threshold": ["L", "XL"],
+      "retry_threshold": 3,
+      "files_threshold": 5
+    }
+  },
+  "git": {
+    "commit_docs": true,
+    "branch_strategy": "github-flow",
+    "auto_stage_docs": true,
+    "conventional_commits": true,
+    "commit_types": ["feat", "fix", "docs", "style", "refactor", "chore"],
+    "commit_language": "es"
+  },
+  "proyecto": {
+    "nombre": "GeoGastronomica",
+    "tipo": "Plugin WordPress",
+    "cliente": "",
+    "stack": {
+      "frontend": "PHP + JS vanilla + CSS",
+      "backend": "WordPress Plugin (PHP 8.0+ OOP)",
+      "db": "WordPress wpdb (CPT + post_meta + tabla custom stats)",
+      "testing": "PHPUnit + Brain Monkey + @wordpress/env",
+      "runtime": "WordPress 6.x+",
+      "package_manager": "Composer (classmap)"
+    },
+    "repo": "",
+    "path": "C:/Users/Piensaenweb/Documents/Claude/geogastronomica"
+  },
+  "subAgent": "",
+  "skills": [],
+  "skillsConfig": {
+    "timeout": 3600,
+    "retryOnFailure": true,
+    "maxRetries": 1
+  },
+  "guardrails": {
+    "enabled": true,
+    "protect_main": true,
+    "suggest_branch_naming": true,
+    "warn_git_add_all": true
+  },
+  "team": {
+    "experience_level": null,
+    "first_run": true
+  },
+  "paths": {
+    "briefing": ".planning/BRIEFING.md",
+    "planificacion": ".planning/ROADMAP.md",
+    "estado": ".planning/estado.md",
+    "config": ".planning/config.json"
+  }
+}

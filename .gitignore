@@ -1,0 +1,34 @@
+# === Dependencias ===
+node_modules/
+vendor/
+
+# === Build ===
+dist/
+build/
+
+# === Entorno ===
+.env
+.env.local
+.env.*.local
+
+# === IDE ===
+.idea/
+.vscode/settings.json
+*.swp
+*.swo
+
+# === OS ===
+.DS_Store
+Thumbs.db
+*.log
+
+# === WordPress ===
+*.sql
+*.sql.gz
+
+# ============================================
+# NO EXCLUIR — .planning/ viaja con el repo
+# Es lo que permite que cualquier dev pueda
+# continuar el proyecto sin preguntar a nadie.
+# ============================================
+# .planning/    <- NUNCA descomentar esta linea
