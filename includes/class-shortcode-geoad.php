@@ -113,12 +113,9 @@ class Shortcode_GeoAd {
 
 		$ads = $this->get_active_ads_cached( $zone );
 		if ( empty( $ads ) ) {
-			// Debug: mostrar por que no hay anuncios.
-			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-				$debug = $this->debug_zone( $zone );
-				return '<!-- geoad debug [' . esc_html( $zone ) . ']: ' . esc_html( $debug ) . ' -->';
-			}
-			return '';
+			// Sin anuncios: eliminar el wrapper .brxe-shortcode del DOM
+			// para que no ocupe espacio en la grid de Bricks.
+			return '<script>!function(){var s=document.currentScript;if(s){var p=s.parentElement;if(p&&p.classList.contains("brxe-shortcode")){p.remove()}else{s.remove()}}}()</script>';
 		}
 
 		$this->maybe_enqueue_assets();

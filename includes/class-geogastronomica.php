@@ -24,7 +24,7 @@ class GeoGastronomica {
 	/**
 	 * Version del plugin.
 	 */
-	public const VERSION = '1.7.3';
+	public const VERSION = '1.7.4';
 
 	/**
 	 * Prefijo para meta keys.
