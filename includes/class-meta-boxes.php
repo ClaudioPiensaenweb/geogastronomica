@@ -291,24 +291,11 @@ class Meta_Boxes {
 				</div>
 			</div>
 
-			<!-- Zonas -->
+			<!-- Pack de visibilidad -->
 			<div class="geo-section">
-				<div class="geo-section-title"><?php esc_html_e( 'Donde se muestra', 'geogastronomica' ); ?></div>
-				<p class="geo-section-hint"><?php esc_html_e( 'Selecciona en que zonas aparece este anuncio.', 'geogastronomica' ); ?></p>
-				<?php
-				$zone_fields = array(
-					'_geo_anuncio_home'         => $fields['_geo_anuncio_home'],
-					'_geo_anuncio_categoria'    => $fields['_geo_anuncio_categoria'],
-					'_geo_anuncio_subcategoria' => $fields['_geo_anuncio_subcategoria'],
-				);
-				foreach ( $zone_fields as $meta_key => $field ) :
-					$value = get_post_meta( $pid, $meta_key, true );
-					?>
-					<div class="geo-zone-group">
-						<div class="geo-zone-group-title"><?php echo esc_html( $field['label'] ); ?></div>
-						<?php $this->render_zone_checkboxes( $meta_key, $field, $value ); ?>
-					</div>
-				<?php endforeach; ?>
+				<div class="geo-section-title"><?php esc_html_e( 'Visibilidad', 'geogastronomica' ); ?></div>
+				<p class="geo-section-hint"><?php esc_html_e( 'Selecciona un pack o configura las zonas manualmente.', 'geogastronomica' ); ?></p>
+				<?php $this->render_pack_selector( $pid, $fields ); ?>
 			</div>
 
 		</div>
@@ -446,6 +433,104 @@ class Meta_Boxes {
 	}
 
 	/**
+	 * Renderizar selector de pack + zonas.
+	 *
+	 * @param int   $post_id ID del post.
+	 * @param array $fields  Campos de configuracion.
+	 */
+	private function render_pack_selector( int $post_id, array $fields ): void {
+		$packs        = Settings::get_packs();
+		$current_pack = get_post_meta( $post_id, '_geo_pack', true );
+		$page_labels  = array(
+			'home'         => esc_html__( 'Inicio', 'geogastronomica' ),
+			'categoria'    => esc_html__( 'Categoria', 'geogastronomica' ),
+			'subcategoria' => esc_html__( 'Subcategoria / Articulo', 'geogastronomica' ),
+		);
+		$zone_labels = array(
+			'vertical_1'   => 'V1',
+			'vertical_2'   => 'V2',
+			'vertical_3'   => 'V3',
+			'horizontal_1' => 'H1',
+			'horizontal_2' => 'H2',
+		);
+		?>
+		<!-- Pack selector -->
+		<div class="geo-pack-selector">
+			<?php foreach ( $packs as $slug => $pack ) : ?>
+				<label class="geo-pack-option <?php echo $current_pack === $slug ? 'selected' : ''; ?>">
+					<input type="radio" name="_geo_pack" value="<?php echo esc_attr( $slug ); ?>"
+					       <?php checked( $current_pack, $slug ); ?>>
+					<span class="geo-pack-option-inner">
+						<strong class="geo-pack-option-name"><?php echo esc_html( $pack['name'] ); ?></strong>
+						<?php if ( ! empty( $pack['price'] ) ) : ?>
+							<span class="geo-pack-option-price"><?php echo esc_html( $pack['price'] ); ?>&euro;</span>
+						<?php endif; ?>
+						<span class="geo-pack-option-zones">
+							<?php
+							$zone_summary = array();
+							foreach ( $pack['zones'] as $page => $page_zones ) {
+								if ( ! empty( $page_zones ) ) {
+									$labels = array_map( function( $z ) use ( $zone_labels ) {
+										return $zone_labels[ $z ] ?? $z;
+									}, $page_zones );
+									$zone_summary[] = ( $page_labels[ $page ] ?? $page ) . ': ' . implode( ', ', $labels );
+								}
+							}
+							echo esc_html( implode( ' | ', $zone_summary ) );
+							?>
+						</span>
+					</span>
+				</label>
+			<?php endforeach; ?>
+
+			<label class="geo-pack-option <?php echo 'custom' === $current_pack ? 'selected' : ''; ?> <?php echo empty( $current_pack ) ? 'selected' : ''; ?>">
+				<input type="radio" name="_geo_pack" value="custom"
+				       <?php checked( in_array( $current_pack, array( 'custom', '' ), true ) ); ?>>
+				<span class="geo-pack-option-inner">
+					<strong class="geo-pack-option-name"><?php esc_html_e( 'Personalizado', 'geogastronomica' ); ?></strong>
+					<span class="geo-pack-option-zones"><?php esc_html_e( 'Selecciona zonas manualmente', 'geogastronomica' ); ?></span>
+				</span>
+			</label>
+		</div>
+
+		<!-- Zonas manuales (solo visible con pack "custom") -->
+		<div id="geo-custom-zones" style="<?php echo ( 'custom' === $current_pack || empty( $current_pack ) ) ? '' : 'display:none;'; ?>margin-top:16px;">
+			<?php
+			$zone_fields = array(
+				'_geo_anuncio_home'         => $fields['_geo_anuncio_home'],
+				'_geo_anuncio_categoria'    => $fields['_geo_anuncio_categoria'],
+				'_geo_anuncio_subcategoria' => $fields['_geo_anuncio_subcategoria'],
+			);
+			foreach ( $zone_fields as $meta_key => $field ) :
+				$value = get_post_meta( $post_id, $meta_key, true );
+				?>
+				<div class="geo-zone-group">
+					<div class="geo-zone-group-title"><?php echo esc_html( $field['label'] ); ?></div>
+					<?php $this->render_zone_checkboxes( $meta_key, $field, $value ); ?>
+				</div>
+			<?php endforeach; ?>
+		</div>
+
+		<script>
+		(function(){
+			const radios = document.querySelectorAll('input[name="_geo_pack"]');
+			const customZones = document.getElementById('geo-custom-zones');
+
+			radios.forEach(function(radio) {
+				radio.addEventListener('change', function() {
+					document.querySelectorAll('.geo-pack-option').forEach(function(el) {
+						el.classList.remove('selected');
+					});
+					this.closest('.geo-pack-option').classList.add('selected');
+					customZones.style.display = (this.value === 'custom') ? '' : 'none';
+				});
+			});
+		})();
+		</script>
+		<?php
+	}
+
+	/**
 	 * Guardar meta datos con sanitizacion.
 	 *
 	 * @param int      $post_id ID del post.
@@ -462,16 +547,34 @@ class Meta_Boxes {
 			return;
 		}
 
+		// Guardar pack seleccionado.
+		$pack_slug = sanitize_key( $_POST['_geo_pack'] ?? 'custom' );
+		update_post_meta( $post_id, '_geo_pack', $pack_slug );
+
+		// Si es un pack predefinido, rellenar zonas desde la config del pack.
+		if ( 'custom' !== $pack_slug ) {
+			$packs = Settings::get_packs();
+			if ( isset( $packs[ $pack_slug ] ) ) {
+				$pack_zones = $packs[ $pack_slug ]['zones'];
+				update_post_meta( $post_id, '_geo_anuncio_home', $pack_zones['home'] ?? array() );
+				update_post_meta( $post_id, '_geo_anuncio_categoria', $pack_zones['categoria'] ?? array() );
+				update_post_meta( $post_id, '_geo_anuncio_subcategoria', $pack_zones['subcategoria'] ?? array() );
+			}
+		}
+
 		// Guardar cada campo con su sanitizacion.
 		$tabs = $this->get_tabs();
 		foreach ( $tabs as $tab ) {
 			foreach ( $tab['fields'] as $meta_key => $field ) {
+				// Zonas se gestionan arriba si es pack predefinido.
 				if ( 'zone_checkboxes' === $field['type'] ) {
-					$raw   = isset( $_POST[ $meta_key ] ) && is_array( $_POST[ $meta_key ] )
-						? $_POST[ $meta_key ]
-						: array();
-					$value = array_map( 'sanitize_text_field', $raw );
-					update_post_meta( $post_id, $meta_key, $value );
+					if ( 'custom' === $pack_slug ) {
+						$raw   = isset( $_POST[ $meta_key ] ) && is_array( $_POST[ $meta_key ] )
+							? $_POST[ $meta_key ]
+							: array();
+						$value = array_map( 'sanitize_text_field', $raw );
+						update_post_meta( $post_id, $meta_key, $value );
+					}
 				} elseif ( 'checkbox' === $field['type'] ) {
 					$value = isset( $_POST[ $meta_key ] ) ? 1 : 0;
 					update_post_meta( $post_id, $meta_key, $value );
