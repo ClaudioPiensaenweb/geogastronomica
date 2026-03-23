@@ -69,6 +69,12 @@ class GeoGastronomica {
 	private function init_components(): void {
 		( new CPT_Anuncio() )->init();
 		( new Meta_Boxes() )->init();
+
+		$cache = new Cache_Manager();
+		$cache->init();
+
+		( new Shortcode_GeoAd() )->init( $cache );
+		( new Cron_Manager() )->init();
 	}
 
 	/**
@@ -86,13 +92,13 @@ class GeoGastronomica {
 	 * Ejecutar al activar el plugin.
 	 */
 	public static function activate(): void {
-		// Placeholder para activacion.
+		Cron_Manager::schedule();
 	}
 
 	/**
 	 * Ejecutar al desactivar el plugin.
 	 */
 	public static function deactivate(): void {
-		// Placeholder para desactivacion.
+		Cron_Manager::unschedule();
 	}
 }

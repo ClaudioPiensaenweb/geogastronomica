@@ -136,9 +136,9 @@
 
 | ID | Etiqueta | Titulo | Estado | Dependencias |
 |----|----------|--------|--------|--------------|
-| T-004 | [feature] | Shortcode de zona con renderizado responsive y lazy loading | pendiente | T-003 |
-| T-005 | [feature] | Rotacion JS con transicion fade y cache de consultas | pendiente | T-004 |
-| T-006 | [feature] | Caducidad automatica y filtrado por fechas | pendiente | T-004 |
+| T-004 | [feature] | Shortcode de zona con renderizado responsive y lazy loading | revision | T-003 |
+| T-005 | [feature] | Rotacion JS con transicion fade y cache de consultas | revision | T-004 |
+| T-006 | [feature] | Caducidad automatica y filtrado por fechas | revision | T-004 |
 
 ---
 
