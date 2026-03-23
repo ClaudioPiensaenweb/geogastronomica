@@ -1,0 +1,127 @@
+/**
+ * Admin Order — Drag & drop styles.
+ *
+ * @package GeoGastronomica
+ */
+
+.geo-order-list {
+	list-style: none;
+	margin: 20px 0;
+	padding: 0;
+	max-width: 800px;
+}
+
+.geo-order-item {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 14px 16px;
+	margin-bottom: 4px;
+	background: #fff;
+	border: 1px solid #e2e4e7;
+	border-radius: 6px;
+	cursor: default;
+	transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.geo-order-item:hover {
+	border-color: #2271b1;
+	box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.geo-order-item.caducado {
+	opacity: 0.5;
+}
+
+.geo-order-item.ui-sortable-helper {
+	box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+	border-color: #2271b1;
+}
+
+.geo-order-placeholder {
+	height: 54px;
+	margin-bottom: 4px;
+	background: #f0f6fc;
+	border: 2px dashed #2271b1;
+	border-radius: 6px;
+}
+
+.geo-order-handle {
+	cursor: grab;
+	color: #c3c4c7;
+	font-size: 20px;
+	width: 20px;
+	height: 20px;
+	flex-shrink: 0;
+}
+
+.geo-order-handle:active {
+	cursor: grabbing;
+}
+
+.geo-order-item:hover .geo-order-handle {
+	color: #2271b1;
+}
+
+.geo-order-position {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	background: #f0f0f1;
+	border-radius: 50%;
+	font-size: 12px;
+	font-weight: 700;
+	color: #50575e;
+	flex-shrink: 0;
+}
+
+.geo-order-info {
+	flex: 1;
+	min-width: 0;
+}
+
+.geo-order-info strong {
+	display: block;
+	font-size: 14px;
+	color: #1d2327;
+}
+
+.geo-order-desc {
+	display: block;
+	font-size: 12px;
+	color: #8c8f94;
+	margin-top: 2px;
+}
+
+.geo-order-zones {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+}
+
+.geo-order-zone-tag {
+	display: inline-block;
+	padding: 2px 8px;
+	background: #f0f6fc;
+	border: 1px solid #c5d9ed;
+	border-radius: 3px;
+	font-size: 11px;
+	color: #2271b1;
+	white-space: nowrap;
+}
+
+.geo-order-badge {
+	padding: 3px 10px;
+	border-radius: 3px;
+	font-size: 11px;
+	font-weight: 600;
+	flex-shrink: 0;
+}
+
+.geo-order-badge.caducado {
+	background: #fcf0f1;
+	color: #cc1818;
+	border: 1px solid #f0c8c8;
+}

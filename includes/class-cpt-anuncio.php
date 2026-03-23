@@ -54,6 +54,7 @@ class CPT_Anuncio {
 			'menu_position'       => 25,
 			'menu_icon'           => 'dashicons-megaphone',
 			'supports'            => false,
+			'hierarchical'        => false,
 			'has_archive'         => false,
 			'rewrite'             => false,
 			'capability_type'     => 'post',

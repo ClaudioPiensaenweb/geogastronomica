@@ -82,6 +82,7 @@ class GeoGastronomica {
 
 		( new REST_Stats( $stats ) )->init();
 		( new Settings() )->init();
+		( new Admin_Order() )->init();
 
 		$this->init_update_checker();
 	}
