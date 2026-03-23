@@ -81,6 +81,23 @@ class GeoGastronomica {
 		$stats->init();
 
 		( new REST_Stats( $stats ) )->init();
+
+		$this->init_update_checker();
+	}
+
+	/**
+	 * Configurar actualizaciones desde GitHub.
+	 */
+	private function init_update_checker(): void {
+		if ( ! class_exists( 'YahnisElsts\\PluginUpdateChecker\\v5\\PucFactory' ) ) {
+			return;
+		}
+
+		\YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
+			'https://github.com/piensaenweb/geogastronomica/',
+			GEO_PLUGIN_FILE,
+			'geogastronomica'
+		);
 	}
 
 	/**

@@ -286,10 +286,10 @@
 
 | ID | Etiqueta | Titulo | Estado | Dependencias |
 |----|----------|--------|--------|--------------|
-| T-009 | [seguridad] | Hardening de seguridad en 4 capas | pendiente | T-003, T-008 |
-| T-010 | [feature] | Internacionalizacion i18n completa | pendiente | T-003 |
-| T-011 | [feature] | Sistema de actualizaciones desde GitHub | pendiente | T-001 |
-| T-012 | [feature] | Uninstall limpio y desactivacion segura | pendiente | T-008 |
+| T-009 | [seguridad] | Hardening de seguridad en 4 capas | revision | T-003, T-008 |
+| T-010 | [feature] | Internacionalizacion i18n completa | revision | T-003 |
+| T-011 | [feature] | Sistema de actualizaciones desde GitHub | revision | T-001 |
+| T-012 | [feature] | Uninstall limpio y desactivacion segura | revision | T-008 |
 
 ---
 

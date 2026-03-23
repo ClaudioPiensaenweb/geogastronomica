@@ -52,6 +52,9 @@ define( 'GEO_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 // Autoload de Composer.
 require_once GEO_PLUGIN_DIR . 'vendor/autoload.php';
 
+// Helpers (funciones globales).
+require_once GEO_PLUGIN_DIR . 'includes/helpers/security.php';
+
 // Hooks de activacion y desactivacion.
 register_activation_hook( __FILE__, array( 'GeoGastronomica', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'GeoGastronomica', 'deactivate' ) );

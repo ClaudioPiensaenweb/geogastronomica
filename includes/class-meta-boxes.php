@@ -346,14 +346,8 @@ class Meta_Boxes {
 	 * @param \WP_Post $post    Post actual.
 	 */
 	public function save_meta( int $post_id, \WP_Post $post ): void {
-		// Verificar nonce.
-		if ( ! isset( $_POST[ self::NONCE_FIELD ] )
-		     || ! wp_verify_nonce( $_POST[ self::NONCE_FIELD ], self::NONCE_ACTION ) ) {
-			return;
-		}
-
-		// Verificar capabilities.
-		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+		// Verificar nonce + capabilities.
+		if ( ! geo_verify_request( self::NONCE_ACTION, self::NONCE_FIELD, 'edit_post', $post_id ) ) {
 			return;
 		}
 
