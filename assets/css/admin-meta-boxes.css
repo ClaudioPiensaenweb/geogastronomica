@@ -4,6 +4,11 @@
  * @package GeoGastronomica
  */
 
+/* Ocultar titulo nativo — se auto-genera desde empresa + descripcion */
+.post-type-geo_anuncio #titlediv {
+	display: none;
+}
+
 .geo-meta-tabs {
 	margin-top: 10px;
 }

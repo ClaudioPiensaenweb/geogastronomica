@@ -376,6 +376,20 @@ class Meta_Boxes {
 				}
 			}
 		}
+
+		// Auto-generar titulo desde empresa + descripcion.
+		$empresa     = sanitize_text_field( $_POST['_geo_empresa_nombre'] ?? '' );
+		$descripcion = sanitize_text_field( $_POST['_geo_descripcion'] ?? '' );
+		$auto_title  = trim( $empresa . ( $descripcion ? ' — ' . $descripcion : '' ) );
+
+		if ( $auto_title && $auto_title !== $post->post_title ) {
+			remove_action( 'save_post_' . CPT_Anuncio::POST_TYPE, array( $this, 'save_meta' ) );
+			wp_update_post( array(
+				'ID'         => $post_id,
+				'post_title' => $auto_title,
+			) );
+			add_action( 'save_post_' . CPT_Anuncio::POST_TYPE, array( $this, 'save_meta' ), 10, 2 );
+		}
 	}
 
 	/**

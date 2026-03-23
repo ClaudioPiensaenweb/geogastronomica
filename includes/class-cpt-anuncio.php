@@ -53,7 +53,7 @@ class CPT_Anuncio {
 			'show_in_rest'        => false,
 			'menu_position'       => 25,
 			'menu_icon'           => 'dashicons-megaphone',
-			'supports'            => array( 'title', 'thumbnail' ),
+			'supports'            => array( '' ),
 			'has_archive'         => false,
 			'rewrite'             => false,
 			'capability_type'     => 'post',
