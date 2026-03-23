@@ -75,6 +75,12 @@ class GeoGastronomica {
 
 		( new Shortcode_GeoAd() )->init( $cache );
 		( new Cron_Manager() )->init();
+		( new Admin_Columns() )->init();
+
+		$stats = new Stats_Tracker();
+		$stats->init();
+
+		( new REST_Stats( $stats ) )->init();
 	}
 
 	/**
@@ -93,6 +99,8 @@ class GeoGastronomica {
 	 */
 	public static function activate(): void {
 		Cron_Manager::schedule();
+		Stats_Tracker::schedule();
+		Stats_Tracker::create_table();
 	}
 
 	/**
@@ -100,5 +108,6 @@ class GeoGastronomica {
 	 */
 	public static function deactivate(): void {
 		Cron_Manager::unschedule();
+		Stats_Tracker::unschedule();
 	}
 }

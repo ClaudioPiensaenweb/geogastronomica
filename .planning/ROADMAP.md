@@ -225,8 +225,8 @@
 
 | ID | Etiqueta | Titulo | Estado | Dependencias |
 |----|----------|--------|--------|--------------|
-| T-007 | [feature] | Columnas admin personalizadas y acciones en lote | pendiente | T-003 |
-| T-008 | [feature] | Estadisticas de impresiones y clicks | pendiente | T-005 |
+| T-007 | [feature] | Columnas admin personalizadas y acciones en lote | revision | T-003 |
+| T-008 | [feature] | Estadisticas de impresiones y clicks | revision | T-005 |
 
 ---
 
