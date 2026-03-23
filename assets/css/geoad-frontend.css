@@ -52,12 +52,14 @@
 	aspect-ratio: 1230 / 350;
 }
 
-/* Movil: todos los banners se adaptan al ancho completo con aspect-ratio movil */
+/* Movil: ancho completo, alto proporcional a 1000x400 (ratio 5:2) */
 @media (max-width: 767px) {
 	.geoad-zone--vertical,
 	.geoad-zone--horizontal {
 		max-width: 100%;
-		aspect-ratio: 1000 / 400;
+		aspect-ratio: 5 / 2;
+		max-height: none;
+		min-height: unset;
 	}
 }
 
