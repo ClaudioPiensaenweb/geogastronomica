@@ -63,8 +63,9 @@
 	}
 }
 
-/* Shortcode vacio no ocupa espacio en la grid */
-.brxe-shortcode:empty {
+/* Shortcode vacio: el JS inline lo elimina del DOM.
+   Fallback CSS por si el script no ejecuta. */
+.brxe-shortcode:not(:has(.geoad-zone)) {
 	display: none !important;
 }
 
