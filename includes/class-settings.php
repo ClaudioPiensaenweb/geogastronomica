@@ -20,16 +20,50 @@ class Settings {
 	private const OPTION_NAME = 'geogastronomica_settings';
 
 	/**
+	 * Option name para los packs.
+	 */
+	public const PACKS_OPTION = 'geogastronomica_packs';
+
+	/**
 	 * Nonce action.
 	 */
 	private const NONCE_ACTION = 'geo_save_settings';
+
+	/**
+	 * Zonas disponibles por pagina.
+	 */
+	public const AVAILABLE_ZONES = array(
+		'home'          => array( 'vertical_1', 'horizontal_1', 'horizontal_2' ),
+		'categoria'     => array( 'vertical_1', 'horizontal_1', 'horizontal_2' ),
+		'subcategoria'  => array( 'vertical_1', 'vertical_2', 'vertical_3', 'horizontal_1' ),
+	);
+
+	/**
+	 * Labels de paginas.
+	 */
+	private const PAGE_LABELS = array(
+		'home'         => 'Pagina de inicio',
+		'categoria'    => 'Pagina de categoria',
+		'subcategoria' => 'Subcategoria / Articulo / Autor',
+	);
+
+	/**
+	 * Labels de zonas.
+	 */
+	private const ZONE_LABELS = array(
+		'vertical_1'   => 'Vertical 1',
+		'vertical_2'   => 'Vertical 2',
+		'vertical_3'   => 'Vertical 3',
+		'horizontal_1' => 'Horizontal 1',
+		'horizontal_2' => 'Horizontal 2',
+	);
 
 	/**
 	 * Inicializar hooks.
 	 */
 	public function init(): void {
 		add_action( 'admin_menu', array( $this, 'add_submenu' ) );
-		add_action( 'admin_init', array( $this, 'register_settings' ) );
+		add_action( 'admin_init', array( $this, 'handle_save' ) );
 	}
 
 	/**
@@ -47,35 +81,106 @@ class Settings {
 	}
 
 	/**
-	 * Registrar settings con la Settings API.
+	 * Obtener packs configurados.
+	 *
+	 * @return array Packs con slug => { name, price, zones }.
 	 */
-	public function register_settings(): void {
-		register_setting(
-			'geogastronomica_settings_group',
-			self::OPTION_NAME,
-			array(
-				'type'              => 'array',
-				'sanitize_callback' => array( $this, 'sanitize_settings' ),
-			)
+	public static function get_packs(): array {
+		$packs = get_option( self::PACKS_OPTION, array() );
+		if ( empty( $packs ) ) {
+			return self::get_default_packs();
+		}
+		return $packs;
+	}
+
+	/**
+	 * Packs por defecto.
+	 *
+	 * @return array
+	 */
+	private static function get_default_packs(): array {
+		return array(
+			'basico' => array(
+				'name'  => 'Basico',
+				'price' => '200',
+				'zones' => array(
+					'home'         => array( 'vertical_1' ),
+					'categoria'    => array( 'vertical_1' ),
+					'subcategoria' => array( 'vertical_1' ),
+				),
+			),
+			'avanzado' => array(
+				'name'  => 'Avanzado',
+				'price' => '350',
+				'zones' => array(
+					'home'         => array( 'vertical_1', 'horizontal_1' ),
+					'categoria'    => array( 'vertical_1', 'horizontal_1' ),
+					'subcategoria' => array( 'vertical_1', 'vertical_2', 'horizontal_1' ),
+				),
+			),
+			'premium' => array(
+				'name'  => 'Premium',
+				'price' => '500',
+				'zones' => array(
+					'home'         => array( 'vertical_1', 'horizontal_1', 'horizontal_2' ),
+					'categoria'    => array( 'vertical_1', 'horizontal_1', 'horizontal_2' ),
+					'subcategoria' => array( 'vertical_1', 'vertical_2', 'vertical_3', 'horizontal_1' ),
+				),
+			),
 		);
 	}
 
 	/**
-	 * Sanitizar settings al guardar.
-	 *
-	 * @param array $input Datos del formulario.
-	 * @return array Datos sanitizados.
+	 * Guardar ajustes via POST.
 	 */
-	public function sanitize_settings( array $input ): array {
-		$sanitized = array();
-
-		if ( isset( $input['github_token'] ) ) {
-			$token = sanitize_text_field( $input['github_token'] );
-			// Cifrar el token antes de guardarlo.
-			$sanitized['github_token'] = self::encrypt( $token );
+	public function handle_save(): void {
+		if ( ! isset( $_POST['geo_settings_nonce'] ) ) {
+			return;
+		}
+		if ( ! wp_verify_nonce( $_POST['geo_settings_nonce'], self::NONCE_ACTION ) ) {
+			return;
+		}
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
 		}
 
-		return $sanitized;
+		$packs = array();
+
+		if ( isset( $_POST['geo_packs'] ) && is_array( $_POST['geo_packs'] ) ) {
+			foreach ( $_POST['geo_packs'] as $raw_pack ) {
+				$slug = sanitize_key( $raw_pack['slug'] ?? '' );
+				if ( empty( $slug ) ) {
+					continue;
+				}
+
+				$zones = array();
+				foreach ( self::AVAILABLE_ZONES as $page => $page_zones ) {
+					$selected = array();
+					if ( isset( $raw_pack['zones'][ $page ] ) && is_array( $raw_pack['zones'][ $page ] ) ) {
+						$selected = array_intersect(
+							array_map( 'sanitize_key', $raw_pack['zones'][ $page ] ),
+							$page_zones
+						);
+					}
+					$zones[ $page ] = array_values( $selected );
+				}
+
+				$packs[ $slug ] = array(
+					'name'  => sanitize_text_field( $raw_pack['name'] ?? '' ),
+					'price' => sanitize_text_field( $raw_pack['price'] ?? '' ),
+					'zones' => $zones,
+				);
+			}
+		}
+
+		update_option( self::PACKS_OPTION, $packs );
+
+		add_settings_error(
+			'geogastronomica',
+			'settings_updated',
+			esc_html__( 'Ajustes guardados.', 'geogastronomica' ),
+			'updated'
+		);
 	}
 
 	/**
@@ -86,129 +191,211 @@ class Settings {
 			return;
 		}
 
-		$options       = get_option( self::OPTION_NAME, array() );
-		$has_token     = ! empty( $options['github_token'] );
-		$masked_token  = $has_token ? str_repeat( '*', 20 ) . substr( self::decrypt( $options['github_token'] ), -6 ) : '';
+		$packs = self::get_packs();
+		settings_errors( 'geogastronomica' );
 
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'GeoGastronomica — Ajustes', 'geogastronomica' ); ?></h1>
 
-			<form method="post" action="options.php">
-				<?php settings_fields( 'geogastronomica_settings_group' ); ?>
+			<div style="background:#fff; border:1px solid #ccd0d4; border-radius:4px; padding:16px 24px; margin:20px 0 12px;">
+				<strong><?php esc_html_e( 'Version actual:', 'geogastronomica' ); ?></strong>
+				<code><?php echo esc_html( GeoGastronomica::VERSION ); ?></code>
+			</div>
 
-				<table class="form-table" role="presentation">
-					<tr>
-						<th scope="row">
-							<label for="geo-github-token">
-								<?php esc_html_e( 'Token GitHub (actualizaciones)', 'geogastronomica' ); ?>
-							</label>
-						</th>
-						<td>
-							<input type="password"
-							       id="geo-github-token"
-							       name="<?php echo esc_attr( self::OPTION_NAME ); ?>[github_token]"
-							       value=""
-							       class="regular-text"
-							       autocomplete="off"
-							       placeholder="<?php echo $has_token ? esc_attr( $masked_token ) : esc_attr__( 'github_pat_...', 'geogastronomica' ); ?>">
-							<?php if ( $has_token ) : ?>
-								<p class="description" style="color: #46b450;">
-									<?php esc_html_e( 'Token configurado correctamente.', 'geogastronomica' ); ?>
-									<?php esc_html_e( 'Deja el campo vacio para mantener el actual.', 'geogastronomica' ); ?>
-								</p>
-							<?php else : ?>
-								<p class="description">
-									<?php esc_html_e( 'Necesario para recibir actualizaciones desde el repositorio privado de GitHub.', 'geogastronomica' ); ?>
-								</p>
-							<?php endif; ?>
-						</td>
-					</tr>
-					<tr>
-						<th scope="row"><?php esc_html_e( 'Version actual', 'geogastronomica' ); ?></th>
-						<td>
-							<code><?php echo esc_html( GeoGastronomica::VERSION ); ?></code>
-						</td>
-					</tr>
-				</table>
+			<form method="post">
+				<?php wp_nonce_field( self::NONCE_ACTION, 'geo_settings_nonce' ); ?>
+
+				<h2><?php esc_html_e( 'Packs de visibilidad', 'geogastronomica' ); ?></h2>
+				<p class="description">
+					<?php esc_html_e( 'Define los packs que aparecen en el editor de anuncios. Cada pack agrupa las zonas donde se muestra un anuncio.', 'geogastronomica' ); ?>
+				</p>
+
+				<div id="geo-packs-container">
+					<?php
+					$index = 0;
+					foreach ( $packs as $slug => $pack ) :
+						$this->render_pack_card( $index, $slug, $pack );
+						$index++;
+					endforeach;
+					?>
+				</div>
+
+				<p>
+					<button type="button" id="geo-add-pack" class="button">
+						+ <?php esc_html_e( 'Anadir pack', 'geogastronomica' ); ?>
+					</button>
+				</p>
 
 				<?php submit_button( esc_html__( 'Guardar ajustes', 'geogastronomica' ) ); ?>
 			</form>
 		</div>
+
+		<template id="geo-pack-template">
+			<?php $this->render_pack_card( '__INDEX__', '', array( 'name' => '', 'price' => '', 'zones' => array() ) ); ?>
+		</template>
+
+		<style>
+			.geo-pack-card {
+				background: #fff;
+				border: 1px solid #ccd0d4;
+				border-radius: 6px;
+				padding: 20px 24px;
+				margin: 16px 0;
+				position: relative;
+			}
+			.geo-pack-card:hover { border-color: #2271b1; }
+			.geo-pack-header {
+				display: flex;
+				gap: 16px;
+				align-items: flex-end;
+				margin-bottom: 16px;
+				flex-wrap: wrap;
+			}
+			.geo-pack-header label {
+				display: block;
+				font-weight: 600;
+				margin-bottom: 4px;
+				font-size: 13px;
+			}
+			.geo-pack-header input { max-width: 200px; }
+			.geo-pack-remove {
+				position: absolute;
+				top: 12px;
+				right: 12px;
+				color: #b32d2e;
+				cursor: pointer;
+				background: none;
+				border: none;
+				font-size: 13px;
+			}
+			.geo-pack-remove:hover { text-decoration: underline; }
+			.geo-pack-zones {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+				gap: 16px;
+			}
+			.geo-zone-column {
+				background: #f9f9f9;
+				border: 1px solid #e5e5e5;
+				border-radius: 4px;
+				padding: 12px;
+			}
+			.geo-zone-column-title {
+				font-weight: 600;
+				font-size: 12px;
+				text-transform: uppercase;
+				color: #50575e;
+				margin-bottom: 8px;
+			}
+			.geo-zone-column label {
+				display: block;
+				padding: 4px 0;
+				font-size: 13px;
+			}
+			.geo-zone-column input[type="checkbox"] { margin-right: 6px; }
+		</style>
+
+		<script>
+		(function() {
+			const container = document.getElementById('geo-packs-container');
+			const addBtn = document.getElementById('geo-add-pack');
+			const template = document.getElementById('geo-pack-template');
+			let packCount = <?php echo count( $packs ); ?>;
+
+			addBtn.addEventListener('click', function() {
+				const html = template.innerHTML.replace(/__INDEX__/g, packCount);
+				const div = document.createElement('div');
+				div.innerHTML = html;
+				container.appendChild(div.firstElementChild);
+				packCount++;
+			});
+
+			container.addEventListener('click', function(e) {
+				if (e.target.classList.contains('geo-pack-remove')) {
+					e.target.closest('.geo-pack-card').remove();
+				}
+			});
+
+			// Auto-generar slug desde nombre.
+			container.addEventListener('input', function(e) {
+				if (e.target.classList.contains('geo-pack-name')) {
+					const card = e.target.closest('.geo-pack-card');
+					const slugInput = card.querySelector('.geo-pack-slug');
+					if (slugInput && !slugInput.dataset.manual) {
+						slugInput.value = e.target.value
+							.toLowerCase()
+							.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+							.replace(/[^a-z0-9]+/g, '_')
+							.replace(/^_|_$/g, '');
+					}
+				}
+			});
+		})();
+		</script>
 		<?php
 	}
 
 	/**
-	 * Obtener el token descifrado.
+	 * Renderizar una card de pack.
 	 *
-	 * @return string Token en texto plano, o vacio.
+	 * @param int|string $index Indice del pack.
+	 * @param string     $slug  Slug del pack.
+	 * @param array      $pack  Datos del pack.
 	 */
-	public static function get_token(): string {
-		// Prioridad: wp-config.php > ajustes del plugin > token embebido.
-		if ( defined( 'GEO_GITHUB_TOKEN' ) && GEO_GITHUB_TOKEN ) {
-			return GEO_GITHUB_TOKEN;
-		}
+	private function render_pack_card( $index, string $slug, array $pack ): void {
+		$prefix = "geo_packs[{$index}]";
+		?>
+		<div class="geo-pack-card">
+			<button type="button" class="geo-pack-remove">&times; <?php esc_html_e( 'Eliminar', 'geogastronomica' ); ?></button>
 
-		$options = get_option( self::OPTION_NAME, array() );
-		if ( ! empty( $options['github_token'] ) ) {
-			return self::decrypt( $options['github_token'] );
-		}
+			<div class="geo-pack-header">
+				<div>
+					<label><?php esc_html_e( 'Nombre del pack', 'geogastronomica' ); ?></label>
+					<input type="text" name="<?php echo esc_attr( $prefix ); ?>[name]"
+					       value="<?php echo esc_attr( $pack['name'] ); ?>"
+					       class="regular-text geo-pack-name"
+					       placeholder="<?php esc_attr_e( 'Ej: Premium', 'geogastronomica' ); ?>">
+				</div>
+				<div>
+					<label><?php esc_html_e( 'Precio', 'geogastronomica' ); ?></label>
+					<input type="text" name="<?php echo esc_attr( $prefix ); ?>[price]"
+					       value="<?php echo esc_attr( $pack['price'] ?? '' ); ?>"
+					       class="small-text"
+					       placeholder="0" style="max-width:80px;">
+					<span>&euro;</span>
+				</div>
+				<div>
+					<label><?php esc_html_e( 'ID', 'geogastronomica' ); ?></label>
+					<input type="text" name="<?php echo esc_attr( $prefix ); ?>[slug]"
+					       value="<?php echo esc_attr( $slug ); ?>"
+					       class="geo-pack-slug"
+					       style="max-width:120px; font-family:monospace;"
+					       <?php echo $slug ? 'data-manual="1"' : ''; ?>>
+				</div>
+			</div>
 
-		// Fallback: token embebido (ofuscado).
-		return self::get_embedded_token();
-	}
-
-	/**
-	 * Cifrar un valor con clave unica del sitio.
-	 *
-	 * @param string $value Valor a cifrar.
-	 * @return string Valor cifrado (base64).
-	 */
-	private static function encrypt( string $value ): string {
-		if ( empty( $value ) ) {
-			return '';
-		}
-		$key    = self::get_encryption_key();
-		$iv     = substr( hash( 'sha256', $key ), 0, 16 );
-		$encrypted = openssl_encrypt( $value, 'AES-256-CBC', $key, 0, $iv );
-		return base64_encode( $encrypted );
-	}
-
-	/**
-	 * Descifrar un valor.
-	 *
-	 * @param string $value Valor cifrado (base64).
-	 * @return string Valor descifrado.
-	 */
-	private static function decrypt( string $value ): string {
-		if ( empty( $value ) ) {
-			return '';
-		}
-		$key    = self::get_encryption_key();
-		$iv     = substr( hash( 'sha256', $key ), 0, 16 );
-		$decoded = base64_decode( $value );
-		return openssl_decrypt( $decoded, 'AES-256-CBC', $key, 0, $iv ) ?: '';
-	}
-
-	/**
-	 * Obtener clave de cifrado del sitio.
-	 *
-	 * @return string Clave derivada de AUTH_KEY de WordPress.
-	 */
-	private static function get_encryption_key(): string {
-		return hash( 'sha256', ( defined( 'AUTH_KEY' ) ? AUTH_KEY : 'geogastronomica-fallback-key' ) );
-	}
-
-	/**
-	 * Token embebido como fallback.
-	 *
-	 * @return string Token decodificado.
-	 */
-	private static function get_embedded_token(): string {
-		$p = 'Z2l0aHViX3BhdF8xMUI2VEhESUkwbllQTnBn'
-		   . 'Y0VZQWl6X2N0S0I5MHQxd1pyMnp2aDh3UzFz'
-		   . 'MHdoZTNORlNNTmdQZUpqbndCMjVvdU9WQlpM'
-		   . 'TFVMWnpGN2hwbFZh';
-		return base64_decode( $p );
+			<div class="geo-pack-zones">
+				<?php foreach ( self::AVAILABLE_ZONES as $page => $page_zones ) : ?>
+					<div class="geo-zone-column">
+						<div class="geo-zone-column-title">
+							<?php echo esc_html( self::PAGE_LABELS[ $page ] ?? $page ); ?>
+						</div>
+						<?php foreach ( $page_zones as $zone ) :
+							$checked = isset( $pack['zones'][ $page ] ) && in_array( $zone, $pack['zones'][ $page ], true );
+							?>
+							<label>
+								<input type="checkbox"
+								       name="<?php echo esc_attr( $prefix ); ?>[zones][<?php echo esc_attr( $page ); ?>][]"
+								       value="<?php echo esc_attr( $zone ); ?>"
+								       <?php checked( $checked ); ?>>
+								<?php echo esc_html( self::ZONE_LABELS[ $zone ] ?? $zone ); ?>
+							</label>
+						<?php endforeach; ?>
+					</div>
+				<?php endforeach; ?>
+			</div>
+		</div>
+		<?php
 	}
 }

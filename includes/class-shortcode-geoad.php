@@ -27,6 +27,13 @@ class Shortcode_GeoAd {
 	private bool $assets_enqueued = false;
 
 	/**
+	 * Flag para emitir CSS de fallback solo una vez.
+	 *
+	 * @var bool
+	 */
+	private bool $fallback_emitted = false;
+
+	/**
 	 * Cache manager.
 	 *
 	 * @var Cache_Manager|null
@@ -90,7 +97,10 @@ class Shortcode_GeoAd {
 	 */
 	public function render( $atts ): string {
 		$atts = shortcode_atts(
-			array( 'zone' => '' ),
+			array(
+				'zone'          => '',
+				'fallback_hide' => '',
+			),
 			$atts,
 			self::TAG
 		);
@@ -102,18 +112,29 @@ class Shortcode_GeoAd {
 				: '';
 		}
 
-		$this->maybe_enqueue_assets();
-
 		$ads = $this->get_active_ads_cached( $zone );
 		if ( empty( $ads ) ) {
+			// Sin anuncios = cero impacto en el DOM.
 			return '';
 		}
+
+		$this->maybe_enqueue_assets();
 
 		if ( count( $ads ) > 1 ) {
 			wp_enqueue_script( 'geoad-rotation' );
 		}
 
-		return $this->build_html( $ads, $zone );
+		$output = '';
+
+		// Si hay anuncios y hay un selector fallback, ocultarlo.
+		$fallback = sanitize_text_field( $atts['fallback_hide'] );
+		if ( ! empty( $fallback ) && ! $this->fallback_emitted ) {
+			$output .= '<style>' . esc_html( $fallback ) . '{display:none!important}</style>';
+			$this->fallback_emitted = true;
+		}
+
+		$output .= $this->build_html( $ads, $zone );
+		return $output;
 	}
 
 	/**
