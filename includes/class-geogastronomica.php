@@ -24,7 +24,7 @@ class GeoGastronomica {
 	/**
 	 * Version del plugin.
 	 */
-	public const VERSION = '1.0.2';
+	public const VERSION = '1.0.3';
 
 	/**
 	 * Prefijo para meta keys.
@@ -94,7 +94,7 @@ class GeoGastronomica {
 		}
 
 		\YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
-			'https://github.com/piensaenweb/geogastronomica/',
+			'https://github.com/ClaudioPiensaenweb/geogastronomica/',
 			GEO_PLUGIN_FILE,
 			'geogastronomica'
 		);
