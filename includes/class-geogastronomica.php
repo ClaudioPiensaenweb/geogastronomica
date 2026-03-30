@@ -24,7 +24,7 @@ class GeoGastronomica {
 	/**
 	 * Version del plugin.
 	 */
-	public const VERSION = '1.8.4';
+	public const VERSION = '1.8.5';
 
 	/**
 	 * Prefijo para meta keys.
@@ -84,6 +84,7 @@ class GeoGastronomica {
 		( new Settings() )->init();
 		( new Admin_Order() )->init();
 		( new Admin_Guide() )->init();
+		( new Auto_Inject() )->init();
 
 		$this->init_update_checker();
 	}
