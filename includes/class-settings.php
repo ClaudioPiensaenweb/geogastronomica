@@ -141,6 +141,11 @@ class Settings {
 	private const ROTATION_OPTION = 'geogastronomica_rotation';
 
 	/**
+	 * Option name para la URL de politica de privacidad del label.
+	 */
+	private const LABEL_OPTION = 'geogastronomica_label_url';
+
+	/**
 	 * Obtener intervalo de rotacion en milisegundos.
 	 *
 	 * @return int Milisegundos entre cambio de banner (default 5000).
@@ -148,6 +153,15 @@ class Settings {
 	public static function get_rotation_interval(): int {
 		$saved = get_option( self::ROTATION_OPTION, array() );
 		return max( 1000, (int) ( $saved['interval'] ?? 5000 ) );
+	}
+
+	/**
+	 * Obtener URL de politica de privacidad para el label de publicidad.
+	 *
+	 * @return string URL o cadena vacia.
+	 */
+	public static function get_label_privacy_url(): string {
+		return (string) get_option( self::LABEL_OPTION, '' );
 	}
 
 	/**
@@ -246,6 +260,10 @@ class Settings {
 		// Guardar intervalo de rotacion.
 		$interval = max( 1000, (int) ( $_POST['geo_rotation_interval'] ?? 5000 ) );
 		update_option( self::ROTATION_OPTION, array( 'interval' => $interval ) );
+
+		// Guardar URL de privacidad del label.
+		$label_url = esc_url_raw( $_POST['geo_label_privacy_url'] ?? '' );
+		update_option( self::LABEL_OPTION, $label_url );
 
 		add_settings_error(
 			'geogastronomica',
@@ -398,6 +416,24 @@ class Settings {
 							<span class="description">
 								ms &nbsp;(<?php esc_html_e( 'tiempo entre cambios de banner; minimo 1000 ms = 1 segundo', 'geogastronomica' ); ?>)
 							</span>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">
+							<label for="geo_label_privacy_url">
+								<?php esc_html_e( 'URL politica de privacidad', 'geogastronomica' ); ?>
+							</label>
+						</th>
+						<td>
+							<input type="url"
+							       id="geo_label_privacy_url"
+							       name="geo_label_privacy_url"
+							       value="<?php echo esc_attr( Settings::get_label_privacy_url() ); ?>"
+							       placeholder="https://tudominio.com/politica-de-privacidad"
+							       style="width:360px;">
+							<p class="description">
+								<?php esc_html_e( 'Si se rellena, la etiqueta "Publicidad" de cada banner enlaza a esta URL. Recomendado para RGPD (Art. 13 / 14).', 'geogastronomica' ); ?>
+							</p>
 						</td>
 					</tr>
 				</table>
