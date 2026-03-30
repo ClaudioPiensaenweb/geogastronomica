@@ -338,13 +338,13 @@ class Shortcode_GeoAd {
 			$html  .= '</div>';
 			$first  = false;
 		}
-		$html .= '</div>';
 		$privacy_url = Settings::get_label_privacy_url();
 		if ( $privacy_url ) {
 			$html .= '<a class="geoad-label" href="' . esc_url( $privacy_url ) . '" target="_blank" rel="noopener noreferrer nofollow">Publicidad</a>';
 		} else {
 			$html .= '<span class="geoad-label">Publicidad</span>';
 		}
+		$html .= '</div>';
 		$html .= '</div>';
 		return $html;
 	}
