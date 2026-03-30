@@ -142,8 +142,10 @@ class Settings {
 	 */
 	public static function get_inject_config(): array {
 		$default = array(
-			'enabled'    => false,
-			'injections' => array(
+			'enabled'      => false,
+			'show_desktop' => true,
+			'show_mobile'  => true,
+			'injections'   => array(
 				array( 'zone' => 'subcategoria_horizontal_1', 'after' => 3 ),
 			),
 		);
@@ -205,8 +207,10 @@ class Settings {
 		}
 
 		$inject_config = array(
-			'enabled'    => ! empty( $_POST['geo_inject_enabled'] ),
-			'injections' => array(),
+			'enabled'      => ! empty( $_POST['geo_inject_enabled'] ),
+			'show_desktop' => ! empty( $_POST['geo_inject_desktop'] ),
+			'show_mobile'  => ! empty( $_POST['geo_inject_mobile'] ),
+			'injections'   => array(),
 		);
 
 		if ( isset( $_POST['geo_inject'] ) && is_array( $_POST['geo_inject'] ) ) {
@@ -299,6 +303,25 @@ class Settings {
 						       <?php checked( $inject['enabled'] ); ?>>
 						<strong><?php esc_html_e( 'Activar insercion automatica', 'geogastronomica' ); ?></strong>
 					</label>
+
+					<div class="geo-inject-devices">
+						<label class="geo-inject-toggle">
+							<input type="checkbox" name="geo_inject_desktop" value="1"
+							       <?php checked( $inject['show_desktop'] ?? true ); ?>>
+							<span class="dashicons dashicons-desktop" style="color:#2271b1;"></span>
+							<?php esc_html_e( 'Mostrar en escritorio', 'geogastronomica' ); ?>
+						</label>
+						<label class="geo-inject-toggle">
+							<input type="checkbox" name="geo_inject_mobile" value="1"
+							       <?php checked( $inject['show_mobile'] ?? true ); ?>>
+							<span class="dashicons dashicons-smartphone" style="color:#2271b1;"></span>
+							<?php esc_html_e( 'Mostrar en movil', 'geogastronomica' ); ?>
+						</label>
+					</div>
+
+					<p class="description" style="margin-top:4px;">
+						<?php esc_html_e( 'El anuncio se inserta siempre en formato horizontal, aunque la zona elegida sea vertical.', 'geogastronomica' ); ?>
+					</p>
 
 					<div id="geo-inject-rows" style="margin-top:16px;">
 						<?php foreach ( $inject['injections'] as $i => $inj ) : ?>
@@ -406,6 +429,8 @@ class Settings {
 			/* Insercion automatica */
 			.geo-inject-section { max-width: 680px; }
 			.geo-inject-toggle { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+			.geo-inject-devices { display: flex; gap: 24px; margin: 12px 0 4px; flex-wrap: wrap; }
+			.geo-inject-devices .dashicons { font-size: 18px; width: 18px; height: 18px; }
 			.geo-inject-row {
 				display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
 				background: #f9f9f9; border: 1px solid #e5e5e5; border-radius: 4px;

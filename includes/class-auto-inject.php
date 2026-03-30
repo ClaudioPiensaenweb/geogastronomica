@@ -3,6 +3,7 @@
  * Insercion automatica de anuncios dentro del contenido de articulos.
  *
  * Inyecta el shortcode [geoad] despues del parrafo N del contenido.
+ * Siempre fuerza formato horizontal para encajar bien en el flujo de texto.
  * Si no hay anuncios activos para la zona configurada no emite nada al DOM.
  *
  * @package GeoGastronomica
@@ -31,7 +32,6 @@ class Auto_Inject {
 	 * @return string Contenido modificado.
 	 */
 	public function inject( string $content ): string {
-		// Solo en entradas individuales (post), no paginas ni CPTs.
 		if ( ! is_singular( 'post' ) || is_admin() ) {
 			return $content;
 		}
@@ -42,22 +42,36 @@ class Auto_Inject {
 			return $content;
 		}
 
+		// Determinar si aplicar segun el dispositivo configurado.
+		// Se usa CSS para ocultar segun breakpoint, no deteccion de UA.
+		$show_desktop = ! empty( $config['show_desktop'] );
+		$show_mobile  = ! empty( $config['show_mobile'] );
+
+		if ( ! $show_desktop && ! $show_mobile ) {
+			return $content;
+		}
+
 		$injections = $config['injections'] ?? array();
 		if ( empty( $injections ) ) {
 			return $content;
 		}
 
-		// Dividir el contenido en parrafos usando </p> como separador.
-		// explode preserva el orden y es mas rapido que preg_split.
-		$parts = explode( '</p>', $content );
-		$total_paragraphs = count( $parts ) - 1; // El ultimo trozo es post-ultimo-</p>
+		// Clase CSS para visibilidad por dispositivo.
+		$device_class = '';
+		if ( $show_desktop && ! $show_mobile ) {
+			$device_class = ' geoad-inject--desktop-only';
+		} elseif ( ! $show_desktop && $show_mobile ) {
+			$device_class = ' geoad-inject--mobile-only';
+		}
 
-		// No inyectar en articulos muy cortos.
+		$parts            = explode( '</p>', $content );
+		$total_paragraphs = count( $parts ) - 1;
+
 		if ( $total_paragraphs < 2 ) {
 			return $content;
 		}
 
-		// Construir mapa: numero_de_parrafo => html_a_insertar.
+		// Construir mapa: numero_parrafo => html.
 		$inject_map = array();
 		foreach ( $injections as $inj ) {
 			if ( empty( $inj['zone'] ) || empty( $inj['after'] ) ) {
@@ -65,19 +79,17 @@ class Auto_Inject {
 			}
 
 			$after = (int) $inj['after'];
-
-			// No inyectar mas alla del final del articulo.
 			if ( $after > $total_paragraphs ) {
 				continue;
 			}
 
-			$html = $this->render_zone( sanitize_key( $inj['zone'] ) );
+			// Siempre fuerza horizontal: encaja en el flujo de texto
+			// independientemente de si la zona es vertical o horizontal.
+			$html = $this->render_zone( sanitize_key( $inj['zone'] ), $device_class );
 			if ( ! $html ) {
 				continue;
 			}
 
-			// Si ya hay algo en esa posicion (dos inyecciones en el mismo parrafo),
-			// concatenar con separacion.
 			$inject_map[ $after ] = ( $inject_map[ $after ] ?? '' ) . $html;
 		}
 
@@ -85,16 +97,12 @@ class Auto_Inject {
 			return $content;
 		}
 
-		// Reconstruir el contenido insertando los banners en las posiciones.
 		$result = '';
 		foreach ( $parts as $i => $part ) {
 			$result .= $part;
-
-			// Restaurar el </p> que explode eliminó (salvo en el ultimo trozo).
 			if ( $i < count( $parts ) - 1 ) {
 				$result .= '</p>';
 				$paragraph_number = $i + 1;
-
 				if ( isset( $inject_map[ $paragraph_number ] ) ) {
 					$result .= $inject_map[ $paragraph_number ];
 				}
@@ -105,24 +113,24 @@ class Auto_Inject {
 	}
 
 	/**
-	 * Renderizar una zona y devolver el HTML solo si hay anuncios activos.
+	 * Renderizar zona forzando siempre formato horizontal.
 	 *
-	 * Usa do_shortcode internamente. Si la zona esta vacia el shortcode
-	 * devuelve solo el script de eliminacion del wrapper (sin .geoad-zone),
-	 * en cuyo caso esta funcion devuelve cadena vacia.
+	 * Aunque la zona sea vertical (ej: subcategoria_vertical_1), se renderiza
+	 * con format="horizontal" para encajar bien dentro del contenido del articulo.
+	 * Si no hay imagen horizontal en el anuncio, se usa la vertical escalada.
 	 *
-	 * @param string $zone Nombre de la zona (ej: subcategoria_horizontal_1).
-	 * @return string HTML del banner o cadena vacia.
+	 * @param string $zone         Zona configurada.
+	 * @param string $device_class Clase CSS de visibilidad por dispositivo.
+	 * @return string HTML o cadena vacia si no hay anuncios.
 	 */
-	private function render_zone( string $zone ): string {
-		$html = do_shortcode( '[geoad zone="' . esc_attr( $zone ) . '"]' );
+	private function render_zone( string $zone, string $device_class = '' ): string {
+		// format="horizontal" fuerza el CSS class y la imagen horizontal.
+		$html = do_shortcode( '[geoad zone="' . esc_attr( $zone ) . '" format="horizontal"]' );
 
-		// Si no hay anuncios, el shortcode devuelve un <script> de limpieza,
-		// nunca un .geoad-zone. Filtramos por eso.
 		if ( strpos( $html, 'geoad-zone' ) === false ) {
 			return '';
 		}
 
-		return '<div class="geoad-inline-inject">' . $html . '</div>';
+		return '<div class="geoad-inline-inject' . esc_attr( $device_class ) . '">' . $html . '</div>';
 	}
 }

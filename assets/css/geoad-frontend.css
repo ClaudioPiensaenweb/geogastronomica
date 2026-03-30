@@ -115,6 +115,14 @@
 	width: 100%;
 }
 
+@media (min-width: 768px) {
+	.geoad-inject--mobile-only { display: none !important; }
+}
+
+@media (max-width: 767px) {
+	.geoad-inject--desktop-only { display: none !important; }
+}
+
 /* ─── Sticky bottom — solo movil ─────────────────────────────────────────*/
 @media (max-width: 767px) {
 	.geoad-zone--sticky-bottom {

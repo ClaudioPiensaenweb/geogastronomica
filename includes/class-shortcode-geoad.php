@@ -100,6 +100,7 @@ class Shortcode_GeoAd {
 				'zone'          => '',
 				'fallback_hide' => '',
 				'sticky'        => '', // 'bottom' para sticky en movil
+				'format'        => '', // forzar formato: 'horizontal' o 'vertical'
 			),
 			$atts,
 			self::TAG
@@ -132,7 +133,8 @@ class Shortcode_GeoAd {
 			$this->fallback_emitted = true;
 		}
 
-		$output .= $this->build_html( $ads, $zone, sanitize_key( $atts['sticky'] ) );
+		$force_format = sanitize_key( $atts['format'] );
+		$output .= $this->build_html( $ads, $zone, sanitize_key( $atts['sticky'] ), $force_format );
 		return $output;
 	}
 
@@ -304,10 +306,12 @@ class Shortcode_GeoAd {
 	 * @param string $sticky Tipo sticky ('bottom' o '').
 	 * @return string HTML.
 	 */
-	private function build_html( array $ad_ids, string $zone, string $sticky = '' ): string {
+	private function build_html( array $ad_ids, string $zone, string $sticky = '', string $force_format = '' ): string {
 		$zone_parts   = $this->parse_zone( $zone );
 		$slot         = $zone_parts['slot'] ?? '';
-		$format       = $this->detect_primary_format( $slot );
+		$format       = ( $force_format && in_array( $force_format, array( 'vertical', 'horizontal' ), true ) )
+			? $force_format
+			: $this->detect_primary_format( $slot );
 		$sticky_class = $sticky ? ' geoad-zone--sticky-' . esc_attr( $sticky ) : '';
 
 		ob_start();
