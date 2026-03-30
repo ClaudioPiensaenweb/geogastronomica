@@ -316,7 +316,8 @@ class Shortcode_GeoAd {
 
 		// Construir HTML de forma compacta para evitar que wpautop
 		// convierta las lineas en blanco entre bloques PHP en <br>/<p>.
-		$html  = '<div class="geoad-zone geoad-zone--' . esc_attr( $format ) . $sticky_class . '"';
+		$html  = '<div class="geoad-wrap">';
+		$html .= '<div class="geoad-zone geoad-zone--' . esc_attr( $format ) . $sticky_class . '"';
 		$html .= ' data-zone="' . esc_attr( $zone ) . '">';
 		if ( $sticky ) {
 			$html .= '<button class="geoad-sticky-close" aria-label="' . esc_attr__( 'Cerrar anuncio', 'geogastronomica' ) . '">';
@@ -338,7 +339,13 @@ class Shortcode_GeoAd {
 			$first  = false;
 		}
 		$html .= '</div>';
-		$html .= '<span class="geoad-label">Publicidad</span>';
+		$privacy_url = Settings::get_label_privacy_url();
+		if ( $privacy_url ) {
+			$html .= '<a class="geoad-label" href="' . esc_url( $privacy_url ) . '" target="_blank" rel="noopener noreferrer nofollow">Publicidad</a>';
+		} else {
+			$html .= '<span class="geoad-label">Publicidad</span>';
+		}
+		$html .= '</div>';
 		return $html;
 	}
 

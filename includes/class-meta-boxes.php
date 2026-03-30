@@ -112,6 +112,11 @@ class Meta_Boxes {
 						'options'  => array( 'vertical_1', 'vertical_2', 'vertical_3', 'horizontal_1' ),
 						'sanitize' => 'array_map_absint',
 					),
+					'_geo_impresiones_prometidas' => array(
+						'label'    => esc_html__( 'Impresiones contratadas', 'geogastronomica' ),
+						'type'     => 'number',
+						'sanitize' => 'absint',
+					),
 					),
 			),
 		);
@@ -327,6 +332,18 @@ class Meta_Boxes {
 				<div class="geo-section-title"><?php esc_html_e( 'Visibilidad', 'geogastronomica' ); ?></div>
 				<p class="geo-section-hint"><?php esc_html_e( 'Selecciona un pack o configura las zonas manualmente.', 'geogastronomica' ); ?></p>
 				<?php $this->render_pack_selector( $pid, $fields ); ?>
+			</div>
+
+			<!-- Impresiones contratadas -->
+			<div class="geo-section">
+				<div class="geo-section-title"><?php esc_html_e( 'Rendimiento', 'geogastronomica' ); ?></div>
+				<p class="geo-section-hint"><?php esc_html_e( 'Numero de impresiones pactadas con el cliente. Se usa para calcular el progreso y la fecha estimada de cumplimiento.', 'geogastronomica' ); ?></p>
+				<div class="geo-priority-field">
+					<input type="number" id="_geo_impresiones_prometidas" name="_geo_impresiones_prometidas"
+					       value="<?php echo esc_attr( (int) get_post_meta( $pid, '_geo_impresiones_prometidas', true ) ); ?>"
+					       min="0" step="1000" class="small-text" style="width:120px;">
+					<span class="geo-priority-hint"><?php esc_html_e( 'impresiones contratadas (0 = sin objetivo)', 'geogastronomica' ); ?></span>
+				</div>
 			</div>
 
 		</div>

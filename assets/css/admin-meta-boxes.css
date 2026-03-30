@@ -576,3 +576,100 @@
 	color: #aaa;
 	font-family: monospace;
 }
+
+/* ── Stats meta box ── */
+.geo-stats-box {
+	font-size: 13px;
+}
+
+.geo-stats-section {
+	padding: 10px 0;
+	border-bottom: 1px solid #f0f0f1;
+}
+
+.geo-stats-section:last-child {
+	border-bottom: none;
+	padding-bottom: 0;
+}
+
+.geo-stats-label {
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.4px;
+	color: #8c8f94;
+	font-weight: 600;
+	margin-bottom: 8px;
+}
+
+.geo-stats-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 3px 0;
+	color: #50575e;
+}
+
+.geo-stats-row strong {
+	color: #1d2327;
+	display: flex;
+	align-items: center;
+	gap: 5px;
+}
+
+.geo-stats-ctr-label {
+	font-size: 10px;
+	font-weight: 600;
+	padding: 1px 5px;
+	border-radius: 3px;
+	background: currentColor;
+	color: #fff !important;
+	opacity: 0.85;
+}
+
+/* Progress bar */
+.geo-stats-progress {
+	margin-bottom: 6px;
+}
+
+.geo-stats-bar {
+	height: 8px;
+	background: #e2e4e7;
+	border-radius: 4px;
+	overflow: hidden;
+	margin-bottom: 5px;
+}
+
+.geo-stats-bar-fill {
+	height: 100%;
+	background: linear-gradient(90deg, #2271b1, #00a0d2);
+	border-radius: 4px;
+	transition: width 0.3s ease;
+	min-width: 2px;
+}
+
+.geo-stats-progress-text {
+	display: flex;
+	justify-content: space-between;
+	font-size: 12px;
+	color: #50575e;
+}
+
+.geo-stats-meta {
+	font-size: 11px;
+	color: #8c8f94;
+	margin-top: 4px;
+}
+
+.geo-stats-badge {
+	display: inline-block;
+	font-size: 11px;
+	font-weight: 600;
+	padding: 2px 8px;
+	border-radius: 3px;
+	margin-top: 5px;
+}
+
+.geo-stats-badge--success {
+	background: #d8f5e0;
+	color: #00a32a;
+}

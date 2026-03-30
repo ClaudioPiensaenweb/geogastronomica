@@ -129,36 +129,56 @@ class Stats_Tracker {
 	}
 
 	/**
-	 * Obtener totales de un anuncio.
+	 * Obtener totales de un anuncio (alias de get_period_stats sin filtro de fecha).
 	 *
 	 * @param int $post_id ID del anuncio.
 	 * @return array { impressions: int, clicks: int, ctr: float }
 	 */
 	public function get_totals( int $post_id ): array {
+		return $this->get_period_stats( $post_id, 0 );
+	}
+
+	/**
+	 * Obtener totales de un anuncio en un periodo.
+	 *
+	 * @param int $post_id ID del anuncio.
+	 * @param int $days    Numero de dias hacia atras (0 = todos).
+	 * @return array { impressions: int, clicks: int, ctr: float }
+	 */
+	public function get_period_stats( int $post_id, int $days = 0 ): array {
 		global $wpdb;
 		$table = self::table_name();
 
-		$results = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT event_type, SUM(count) as total FROM {$table} WHERE post_id = %d GROUP BY event_type",
-				$post_id
-			)
-		);
+		if ( $days > 0 ) {
+			$cutoff  = gmdate( 'Y-m-d', strtotime( "-{$days} days" ) );
+			$results = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT event_type, SUM(count) as total FROM {$table} WHERE post_id = %d AND event_date >= %s GROUP BY event_type",
+					$post_id,
+					$cutoff
+				)
+			);
+		} else {
+			$results = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT event_type, SUM(count) as total FROM {$table} WHERE post_id = %d GROUP BY event_type",
+					$post_id
+				)
+			);
+		}
 
-		$totals = array( 'impressions' => 0, 'clicks' => 0, 'ctr' => 0.0 );
+		$stats = array( 'impressions' => 0, 'clicks' => 0, 'ctr' => 0.0 );
 		foreach ( $results as $row ) {
 			if ( 'impression' === $row->event_type ) {
-				$totals['impressions'] = (int) $row->total;
+				$stats['impressions'] = (int) $row->total;
 			} elseif ( 'click' === $row->event_type ) {
-				$totals['clicks'] = (int) $row->total;
+				$stats['clicks'] = (int) $row->total;
 			}
 		}
-
-		if ( $totals['impressions'] > 0 ) {
-			$totals['ctr'] = round( ( $totals['clicks'] / $totals['impressions'] ) * 100, 2 );
+		if ( $stats['impressions'] > 0 ) {
+			$stats['ctr'] = round( ( $stats['clicks'] / $stats['impressions'] ) * 100, 2 );
 		}
-
-		return $totals;
+		return $stats;
 	}
 
 	/**
@@ -211,33 +231,111 @@ class Stats_Tracker {
 	}
 
 	/**
-	 * Renderizar meta box de estadisticas.
+	 * Renderizar meta box de estadisticas con estimaciones.
 	 *
 	 * @param \WP_Post $post Post actual.
 	 */
 	public function render_stats_meta_box( \WP_Post $post ): void {
-		$totals = $this->get_totals( $post->ID );
+		$pid      = $post->ID;
+		$totals   = $this->get_period_stats( $pid, 0 );
+		$last7    = $this->get_period_stats( $pid, 7 );
+		$last30   = $this->get_period_stats( $pid, 30 );
+		$prometidas = (int) get_post_meta( $pid, '_geo_impresiones_prometidas', true );
 
 		if ( 0 === $totals['impressions'] && 0 === $totals['clicks'] ) {
-			echo '<p>' . esc_html__( 'Sin datos aun', 'geogastronomica' ) . '</p>';
+			echo '<p style="color:#8c8f94;font-size:12px;">' . esc_html__( 'Sin datos aun. Las estadisticas aparecen cuando el anuncio recibe impresiones.', 'geogastronomica' ) . '</p>';
 			return;
 		}
 
+		// Ritmo diario (ult. 7d, al menos 1 dia para evitar division por cero).
+		$daily_rate = $last7['impressions'] > 0 ? round( $last7['impressions'] / 7 ) : 0;
+
+		// Fecha estimada de cumplimiento.
+		$estimated_date = '';
+		if ( $prometidas > 0 && $daily_rate > 0 && $totals['impressions'] < $prometidas ) {
+			$days_left      = ceil( ( $prometidas - $totals['impressions'] ) / $daily_rate );
+			$estimated_date = gmdate( 'd/m/Y', strtotime( "+{$days_left} days" ) );
+		}
+
+		// Progreso.
+		$progress_pct = 0;
+		if ( $prometidas > 0 ) {
+			$progress_pct = min( 100, round( ( $totals['impressions'] / $prometidas ) * 100, 1 ) );
+		}
+
+		// Color CTR: >= 2% verde, >= 0.5% amarillo, < 0.5% rojo.
+		if ( $totals['ctr'] >= 2 ) {
+			$ctr_color = '#00a32a';
+			$ctr_label = 'Bueno';
+		} elseif ( $totals['ctr'] >= 0.5 ) {
+			$ctr_color = '#dba617';
+			$ctr_label = 'Normal';
+		} else {
+			$ctr_color = '#d63638';
+			$ctr_label = 'Bajo';
+		}
 		?>
-		<table class="widefat" style="border:0">
-			<tr>
-				<td><strong><?php esc_html_e( 'Impresiones', 'geogastronomica' ); ?></strong></td>
-				<td><?php echo esc_html( number_format_i18n( $totals['impressions'] ) ); ?></td>
-			</tr>
-			<tr>
-				<td><strong><?php esc_html_e( 'Clicks', 'geogastronomica' ); ?></strong></td>
-				<td><?php echo esc_html( number_format_i18n( $totals['clicks'] ) ); ?></td>
-			</tr>
-			<tr>
-				<td><strong><?php esc_html_e( 'CTR', 'geogastronomica' ); ?></strong></td>
-				<td><?php echo esc_html( $totals['ctr'] . '%' ); ?></td>
-			</tr>
-		</table>
+		<div class="geo-stats-box">
+
+			<?php if ( $prometidas > 0 ) : ?>
+			<!-- Progreso vs contratadas -->
+			<div class="geo-stats-section">
+				<div class="geo-stats-label"><?php esc_html_e( 'Progreso del contrato', 'geogastronomica' ); ?></div>
+				<div class="geo-stats-progress">
+					<div class="geo-stats-bar">
+						<div class="geo-stats-bar-fill" style="width:<?php echo esc_attr( $progress_pct ); ?>%;"></div>
+					</div>
+					<div class="geo-stats-progress-text">
+						<span><?php echo esc_html( number_format_i18n( $totals['impressions'] ) ); ?> / <?php echo esc_html( number_format_i18n( $prometidas ) ); ?></span>
+						<strong><?php echo esc_html( $progress_pct . '%' ); ?></strong>
+					</div>
+				</div>
+				<?php if ( $totals['impressions'] >= $prometidas ) : ?>
+					<div class="geo-stats-badge geo-stats-badge--success"><?php esc_html_e( 'Objetivo cumplido', 'geogastronomica' ); ?></div>
+				<?php elseif ( $estimated_date ) : ?>
+					<div class="geo-stats-meta"><?php printf( esc_html__( 'Fin estimado: %s (ritmo %s/dia)', 'geogastronomica' ), esc_html( $estimated_date ), esc_html( number_format_i18n( $daily_rate ) ) ); ?></div>
+				<?php endif; ?>
+			</div>
+			<?php endif; ?>
+
+			<!-- Totales -->
+			<div class="geo-stats-section">
+				<div class="geo-stats-label"><?php esc_html_e( 'Total acumulado', 'geogastronomica' ); ?></div>
+				<div class="geo-stats-row">
+					<span><?php esc_html_e( 'Impresiones', 'geogastronomica' ); ?></span>
+					<strong><?php echo esc_html( number_format_i18n( $totals['impressions'] ) ); ?></strong>
+				</div>
+				<div class="geo-stats-row">
+					<span><?php esc_html_e( 'Clicks', 'geogastronomica' ); ?></span>
+					<strong><?php echo esc_html( number_format_i18n( $totals['clicks'] ) ); ?></strong>
+				</div>
+				<div class="geo-stats-row">
+					<span><?php esc_html_e( 'CTR', 'geogastronomica' ); ?></span>
+					<strong style="color:<?php echo esc_attr( $ctr_color ); ?>">
+						<?php echo esc_html( $totals['ctr'] . '%' ); ?>
+						<span class="geo-stats-ctr-label"><?php echo esc_html( $ctr_label ); ?></span>
+					</strong>
+				</div>
+			</div>
+
+			<!-- Ultimos 30 dias -->
+			<div class="geo-stats-section">
+				<div class="geo-stats-label"><?php esc_html_e( 'Ultimos 30 dias', 'geogastronomica' ); ?></div>
+				<div class="geo-stats-row">
+					<span><?php esc_html_e( 'Impresiones', 'geogastronomica' ); ?></span>
+					<strong><?php echo esc_html( number_format_i18n( $last30['impressions'] ) ); ?></strong>
+				</div>
+				<div class="geo-stats-row">
+					<span><?php esc_html_e( 'Clicks', 'geogastronomica' ); ?></span>
+					<strong><?php echo esc_html( number_format_i18n( $last30['clicks'] ) ); ?></strong>
+				</div>
+				<div class="geo-stats-row">
+					<span><?php esc_html_e( 'Ritmo diario (7d)', 'geogastronomica' ); ?></span>
+					<strong><?php echo esc_html( number_format_i18n( $daily_rate ) ); ?>/dia</strong>
+				</div>
+			</div>
+
+		</div>
 		<?php
 	}
 }
