@@ -257,6 +257,37 @@ class Meta_Boxes {
 					</div>
 				<?php endforeach; ?>
 			</div>
+
+			<?php
+			// Vista previa de formatos.
+			$formats = array(
+				'horizontal' => array( 'label' => 'Horizontal (escritorio)', 'ratio' => '1230/350', 'key' => '_geo_imagen_horizontal' ),
+				'movil'      => array( 'label' => 'Movil',                   'ratio' => '1000/400', 'key' => '_geo_imagen_movil' ),
+				'vertical'   => array( 'label' => 'Vertical',                'ratio' => '285/627',  'key' => '_geo_imagen_vertical' ),
+			);
+			?>
+			<div class="geo-preview-section">
+				<div class="geo-section-title"><?php esc_html_e( 'Vista previa', 'geogastronomica' ); ?></div>
+				<div class="geo-preview-grid">
+					<?php foreach ( $formats as $fmt => $fdata ) :
+						$att_id  = (int) get_post_meta( $post->ID, $fdata['key'], true );
+						$img_url = $att_id ? wp_get_attachment_image_url( $att_id, 'large' ) : '';
+					?>
+					<div class="geo-preview-box">
+						<div class="geo-preview-label"><?php echo esc_html( $fdata['label'] ); ?></div>
+						<div class="geo-preview-frame" data-format="<?php echo esc_attr( $fmt ); ?>"
+						     style="aspect-ratio:<?php echo esc_attr( $fdata['ratio'] ); ?>;">
+							<?php if ( $img_url ) : ?>
+								<img src="<?php echo esc_url( $img_url ); ?>" alt="">
+							<?php else : ?>
+								<span class="geo-preview-empty"><?php echo esc_html( str_replace( '/', ' × ', $fdata['ratio'] ) ); ?></span>
+							<?php endif; ?>
+						</div>
+					</div>
+					<?php endforeach; ?>
+				</div>
+			</div>
+
 		</div>
 		<?php
 	}
