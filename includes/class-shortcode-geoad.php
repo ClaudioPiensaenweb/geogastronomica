@@ -375,21 +375,16 @@ class Shortcode_GeoAd {
 		$mobile_url = wp_get_attachment_image_url( $mobile_id, 'full' );
 		$alt        = esc_attr( get_post_meta( $ad_id, '_geo_descripcion', true ) );
 
-		ob_start();
-		?>
-		<picture>
-			<?php if ( $mobile_url && $mobile_id !== $primary_id ) : ?>
-				<source media="(max-width: 767px)"
-				        srcset="<?php echo esc_url( $mobile_url ); ?>">
-			<?php endif; ?>
-			<img src="<?php echo esc_url( $primary_url ); ?>"
-			     alt="<?php echo $alt; ?>"
-			     loading="lazy"
-			     width="<?php echo esc_attr( $this->get_format_width( $format ) ); ?>"
-			     height="<?php echo esc_attr( $this->get_format_height( $format ) ); ?>">
-		</picture>
-		<?php
-		return ob_get_clean();
+		$w   = esc_attr( $this->get_format_width( $format ) );
+		$h   = esc_attr( $this->get_format_height( $format ) );
+		$src = esc_url( $primary_url );
+		$html = '<picture>';
+		if ( $mobile_url && $mobile_id !== $primary_id ) {
+			$html .= '<source media="(max-width: 767px)" srcset="' . esc_url( $mobile_url ) . '">';
+		}
+		$html .= '<img src="' . $src . '" alt="' . $alt . '" loading="lazy" width="' . $w . '" height="' . $h . '">';
+		$html .= '</picture>';
+		return $html;
 	}
 
 	/**
