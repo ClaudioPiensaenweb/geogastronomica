@@ -314,39 +314,31 @@ class Shortcode_GeoAd {
 			: $this->detect_primary_format( $slot );
 		$sticky_class = $sticky ? ' geoad-zone--sticky-' . esc_attr( $sticky ) : '';
 
-		ob_start();
-		?>
-		<div class="geoad-zone geoad-zone--<?php echo esc_attr( $format ); ?><?php echo $sticky_class; ?>"
-		     data-zone="<?php echo esc_attr( $zone ); ?>">
-			<?php if ( $sticky ) : ?>
-				<button class="geoad-sticky-close" aria-label="<?php esc_attr_e( 'Cerrar anuncio', 'geogastronomica' ); ?>">
-					<span aria-hidden="true">&times;</span>
-				</button>
-			<?php endif; ?>
-			<?php
-			$first = true;
-			foreach ( $ad_ids as $ad_id ) :
-				$enlace = get_post_meta( $ad_id, '_geo_enlace', true );
-				?>
-				<div class="geoad-banner <?php echo $first ? 'active' : ''; ?>"
-				     data-ad-id="<?php echo esc_attr( $ad_id ); ?>">
-					<?php if ( $enlace ) : ?>
-					<a href="<?php echo esc_url( $enlace ); ?>" target="_blank" rel="noopener noreferrer">
-					<?php endif; ?>
-
-					<?php echo $this->render_picture( $ad_id, $format ); ?>
-
-					<?php if ( $enlace ) : ?>
-					</a>
-					<?php endif; ?>
-				</div>
-				<?php
-				$first = false;
-			endforeach;
-			?>
-		</div>
-		<?php
-		return ob_get_clean();
+		// Construir HTML de forma compacta para evitar que wpautop
+		// convierta las lineas en blanco entre bloques PHP en <br>/<p>.
+		$html  = '<div class="geoad-zone geoad-zone--' . esc_attr( $format ) . $sticky_class . '"';
+		$html .= ' data-zone="' . esc_attr( $zone ) . '">';
+		if ( $sticky ) {
+			$html .= '<button class="geoad-sticky-close" aria-label="' . esc_attr__( 'Cerrar anuncio', 'geogastronomica' ) . '">';
+			$html .= '<span aria-hidden="true">&times;</span></button>';
+		}
+		$first = true;
+		foreach ( $ad_ids as $ad_id ) {
+			$enlace  = get_post_meta( $ad_id, '_geo_enlace', true );
+			$picture = $this->render_picture( $ad_id, $format );
+			$html   .= '<div class="geoad-banner ' . ( $first ? 'active' : '' ) . '" data-ad-id="' . esc_attr( $ad_id ) . '">';
+			if ( $enlace ) {
+				$html .= '<a href="' . esc_url( $enlace ) . '" target="_blank" rel="noopener noreferrer">';
+			}
+			$html .= $picture;
+			if ( $enlace ) {
+				$html .= '</a>';
+			}
+			$html  .= '</div>';
+			$first  = false;
+		}
+		$html .= '</div>';
+		return $html;
 	}
 
 	/**
