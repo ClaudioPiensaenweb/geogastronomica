@@ -115,6 +115,23 @@
 	display: none !important;
 }
 
+/* ─── Etiqueta legal "Publicidad" ───────────────────────────────────────
+   Fuera del banner, debajo, alineada a la derecha.
+   Art. 20 LSSI: comunicaciones comerciales deben ser identificables.
+*/
+.geoad-label {
+	display: block;
+	font-size: 10px;
+	line-height: 1.2;
+	color: #aaa;
+	text-align: right;
+	margin-top: 3px;
+	font-family: sans-serif;
+	font-weight: normal;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+}
+
 /* ─── Insercion automatica inline entre parrafos ─────────────────────────*/
 .geoad-inline-inject {
 	clear: both;

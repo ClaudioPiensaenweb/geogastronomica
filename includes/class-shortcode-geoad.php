@@ -338,6 +338,7 @@ class Shortcode_GeoAd {
 			$first  = false;
 		}
 		$html .= '</div>';
+		$html .= '<span class="geoad-label">Publicidad</span>';
 		return $html;
 	}
 

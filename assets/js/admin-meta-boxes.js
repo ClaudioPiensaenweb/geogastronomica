@@ -56,6 +56,20 @@
 			$input.val(attachment.id);
 			$preview.html(previewHtml);
 			$removeBtn.show();
+
+			// Actualizar vista previa del formato correspondiente.
+			var formatMap = {
+				'_geo_imagen_horizontal': 'horizontal',
+				'_geo_imagen_movil': 'movil',
+				'_geo_imagen_vertical': 'vertical'
+			};
+			var fieldName = $field.data('field');
+			var fmt = formatMap[fieldName];
+			if (fmt && !isVideo) {
+				var fullUrl = attachment.url;
+				var $frame = $('.geo-preview-frame[data-format="' + fmt + '"]');
+				$frame.html('<img src="' + fullUrl + '" alt="">');
+			}
 		});
 
 		frame.open();
@@ -65,8 +79,21 @@
 	$(document).on('click', '.geo-remove-btn', function (e) {
 		e.preventDefault();
 		var $field = $(this).closest('.geo-image-field');
+		var fieldName = $field.data('field');
 		$field.find('.geo-image-id').val('');
 		$field.find('.geo-image-preview').html('');
 		$(this).hide();
+
+		// Limpiar vista previa correspondiente.
+		var formatMap = {
+			'_geo_imagen_horizontal': 'horizontal',
+			'_geo_imagen_movil': 'movil',
+			'_geo_imagen_vertical': 'vertical'
+		};
+		var fmt = formatMap[fieldName];
+		if (fmt) {
+			var $frame = $('.geo-preview-frame[data-format="' + fmt + '"]');
+			$frame.html('<span class="geo-preview-empty">' + $frame.css('aspect-ratio') + '</span>');
+		}
 	});
 })(jQuery);
