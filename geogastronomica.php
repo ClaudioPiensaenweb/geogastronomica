@@ -3,7 +3,7 @@
  * Plugin Name: GeoGastronomica
  * Plugin URI:  https://geogastronomica.com
  * Description: Sistema de gestion de banners y anuncios publicitarios propios para WordPress.
- * Version:     1.9.0
+ * Version:     1.9.1
  * Requires PHP: 8.0
  * Requires at least: 6.0
  * Author:      Piensaenweb

@@ -94,6 +94,7 @@
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
+	margin: 0 !important; /* anula margin global del tema (ej: 40px 0) */
 }
 
 /* ─── Video ───────────────────────────────────────────────────────────────*/
