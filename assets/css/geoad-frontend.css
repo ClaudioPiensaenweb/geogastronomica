@@ -10,13 +10,12 @@
    overflow: hidden para recortar imagenes que no encajen exactamente.
 */
 .geoad-zone {
-	position: relative !important; /* Bricks puede sobreescribir */
+	position: relative !important;
 	display: block;
 	overflow: hidden;
 	width: 100%;
 	font-size: 0;
 	line-height: 0;
-	isolation: isolate; /* crea stacking context propio — evita que z-index del tema interfiera */
 }
 
 /* ─── Formatos — desktop ──────────────────────────────────────────────────
@@ -54,19 +53,19 @@
    no del contenido. Esto garantiza que 1 o N banners se comportan igual.
 */
 .geoad-banner {
-	position: absolute !important; /* Bricks puede sobreescribir */
+	position: absolute !important;
 	inset: 0;
 	width: 100%;
 	height: 100%;
-	opacity: 0;
+	opacity: 0 !important;
 	transition: opacity 0.6s ease-in-out;
 	z-index: 1;
-	pointer-events: none; /* evita que banner invisible bloquee clics */
+	pointer-events: none;
 }
 
 .geoad-banner.active,
 .geoad-zone .geoad-banner:only-child {
-	opacity: 1;
+	opacity: 1 !important;
 	z-index: 2;
 	pointer-events: auto;
 }
