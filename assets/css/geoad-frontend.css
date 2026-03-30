@@ -84,3 +84,66 @@
 	width: 100%;
 	height: 100%;
 }
+
+/* Video dentro de banners */
+.geoad-video {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* Sticky bottom — solo movil */
+@media (max-width: 767px) {
+	.geoad-zone--sticky-bottom {
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		height: 90px;
+		z-index: 9990;
+		background: #fff;
+		box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.18);
+		overflow: visible;
+		/* Ignorar aspect-ratio del formato base en sticky */
+		aspect-ratio: unset !important;
+	}
+
+	.geoad-zone--sticky-bottom .geoad-banner {
+		position: relative;
+		height: 90px;
+		opacity: 1;
+		z-index: 2;
+	}
+
+	.has-geoad-sticky {
+		padding-bottom: 90px;
+	}
+}
+
+/* Boton cerrar sticky (oculto en desktop) */
+.geoad-sticky-close {
+	display: none;
+	position: absolute;
+	top: -24px;
+	right: 8px;
+	width: 24px;
+	height: 24px;
+	background: rgba(0, 0, 0, 0.55);
+	color: #fff;
+	border: none;
+	border-radius: 50%;
+	font-size: 16px;
+	line-height: 1;
+	cursor: pointer;
+	padding: 0;
+	z-index: 9991;
+	align-items: center;
+	justify-content: center;
+}
+
+@media (max-width: 767px) {
+	.geoad-sticky-close {
+		display: flex;
+	}
+}

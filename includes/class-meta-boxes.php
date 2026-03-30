@@ -65,17 +65,17 @@ class Meta_Boxes {
 						'sanitize' => 'esc_url_raw',
 					),
 					'_geo_imagen_vertical'   => array(
-						'label'    => esc_html__( 'Anuncio vertical (285x627)', 'geogastronomica' ),
+						'label'    => esc_html__( 'Vertical — imagen o video (285x627)', 'geogastronomica' ),
 						'type'     => 'image',
 						'sanitize' => 'absint',
 					),
 					'_geo_imagen_horizontal' => array(
-						'label'    => esc_html__( 'Anuncio horizontal (1230x350)', 'geogastronomica' ),
+						'label'    => esc_html__( 'Horizontal — imagen o video (1230x350)', 'geogastronomica' ),
 						'type'     => 'image',
 						'sanitize' => 'absint',
 					),
 					'_geo_imagen_movil'      => array(
-						'label'    => esc_html__( 'Anuncio para movil (1000x400)', 'geogastronomica' ),
+						'label'    => esc_html__( 'Movil — imagen o video (1000x400)', 'geogastronomica' ),
 						'type'     => 'image',
 						'sanitize' => 'absint',
 					),

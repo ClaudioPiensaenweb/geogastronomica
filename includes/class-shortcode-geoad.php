@@ -99,6 +99,7 @@ class Shortcode_GeoAd {
 			array(
 				'zone'          => '',
 				'fallback_hide' => '',
+				'sticky'        => '', // 'bottom' para sticky en movil
 			),
 			$atts,
 			self::TAG
@@ -119,10 +120,8 @@ class Shortcode_GeoAd {
 		}
 
 		$this->maybe_enqueue_assets();
-
-		if ( count( $ads ) > 1 ) {
-			wp_enqueue_script( 'geoad-rotation' );
-		}
+		// Siempre necesario: lazy video + sticky dismiss.
+		wp_enqueue_script( 'geoad-rotation' );
 
 		$output = '';
 
@@ -133,7 +132,7 @@ class Shortcode_GeoAd {
 			$this->fallback_emitted = true;
 		}
 
-		$output .= $this->build_html( $ads, $zone );
+		$output .= $this->build_html( $ads, $zone, sanitize_key( $atts['sticky'] ) );
 		return $output;
 	}
 
@@ -302,18 +301,25 @@ class Shortcode_GeoAd {
 	 *
 	 * @param array  $ad_ids IDs de anuncios activos.
 	 * @param string $zone   Nombre de la zona.
+	 * @param string $sticky Tipo sticky ('bottom' o '').
 	 * @return string HTML.
 	 */
-	private function build_html( array $ad_ids, string $zone ): string {
-		$zone_parts = $this->parse_zone( $zone );
-		$slot       = $zone_parts['slot'] ?? '';
-		$format     = $this->detect_primary_format( $slot );
+	private function build_html( array $ad_ids, string $zone, string $sticky = '' ): string {
+		$zone_parts   = $this->parse_zone( $zone );
+		$slot         = $zone_parts['slot'] ?? '';
+		$format       = $this->detect_primary_format( $slot );
+		$sticky_class = $sticky ? ' geoad-zone--sticky-' . esc_attr( $sticky ) : '';
 
 		ob_start();
 		?>
-		<div class="geoad-zone geoad-zone--<?php echo esc_attr( $format ); ?>"
+		<div class="geoad-zone geoad-zone--<?php echo esc_attr( $format ); ?><?php echo $sticky_class; ?>"
 		     data-zone="<?php echo esc_attr( $zone ); ?>"
 		     style="aspect-ratio: <?php echo esc_attr( self::ASPECT_RATIOS[ $format ] ?? '16 / 9' ); ?>">
+			<?php if ( $sticky ) : ?>
+				<button class="geoad-sticky-close" aria-label="<?php esc_attr_e( 'Cerrar anuncio', 'geogastronomica' ); ?>">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			<?php endif; ?>
 			<?php
 			$first = true;
 			foreach ( $ad_ids as $ad_id ) :
@@ -341,48 +347,38 @@ class Shortcode_GeoAd {
 	}
 
 	/**
-	 * Renderizar elemento <picture> con source para movil.
-	 *
-	 * La zona determina el formato principal (vertical, horizontal, cuadrado).
-	 * En movil se muestra la imagen movil si existe, sino la del formato principal.
+	 * Renderizar media del anuncio: imagen (<picture>) o video (<video>).
 	 *
 	 * @param int    $ad_id  ID del anuncio.
 	 * @param string $format Formato principal determinado por la zona.
-	 * @return string HTML del picture.
+	 * @return string HTML.
 	 */
 	private function render_picture( int $ad_id, string $format ): string {
-		$images = array(
+		$ids = array(
 			'movil'      => (int) get_post_meta( $ad_id, '_geo_imagen_movil', true ),
 			'horizontal' => (int) get_post_meta( $ad_id, '_geo_imagen_horizontal', true ),
 			'vertical'   => (int) get_post_meta( $ad_id, '_geo_imagen_vertical', true ),
 		);
 
-		// Debug temporal.
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			$debug = 'render_picture ID=' . $ad_id . ' format=' . $format
-				. ' imgs=[v=' . $images['vertical'] . ',h=' . $images['horizontal'] . ',m=' . $images['movil'] . ']';
-		}
-
-		// Imagen principal: la del formato de la zona.
-		$primary_id = $images[ $format ] ?: $this->find_fallback_image( $images );
+		$primary_id = $ids[ $format ] ?: $this->find_fallback_image( $ids );
 		if ( ! $primary_id ) {
-			return defined( 'WP_DEBUG' ) && WP_DEBUG
-				? '<!-- geoad: ' . esc_html( $debug ) . ' primary_id=0 -->'
-				: '';
+			return '';
 		}
 
+		// Si el attachment principal es video, renderizar <video>.
+		if ( $this->is_video( $primary_id ) ) {
+			return $this->render_video( $primary_id, $ids['movil'], $format );
+		}
+
+		// Imagen: usar wp_get_attachment_image_url (no funciona para video).
 		$primary_url = wp_get_attachment_image_url( $primary_id, 'full' );
 		if ( ! $primary_url ) {
-			return defined( 'WP_DEBUG' ) && WP_DEBUG
-				? '<!-- geoad: ' . esc_html( $debug ) . ' primary_id=' . $primary_id . ' url=NULL -->'
-				: '';
+			return '';
 		}
 
-		// Imagen movil: si existe, se usa como <source> para mobile.
-		$mobile_id  = $images['movil'] ?: $primary_id;
+		$mobile_id  = $ids['movil'] ?: $primary_id;
 		$mobile_url = wp_get_attachment_image_url( $mobile_id, 'full' );
-
-		$alt = esc_attr( get_post_meta( $ad_id, '_geo_descripcion', true ) );
+		$alt        = esc_attr( get_post_meta( $ad_id, '_geo_descripcion', true ) );
 
 		ob_start();
 		?>
@@ -397,6 +393,62 @@ class Shortcode_GeoAd {
 			     width="<?php echo esc_attr( $this->get_format_width( $format ) ); ?>"
 			     height="<?php echo esc_attr( $this->get_format_height( $format ) ); ?>">
 		</picture>
+		<?php
+		return ob_get_clean();
+	}
+
+	/**
+	 * Detectar si un attachment es video.
+	 *
+	 * @param int $attachment_id ID del attachment.
+	 * @return bool True si es video.
+	 */
+	private function is_video( int $attachment_id ): bool {
+		$mime = get_post_mime_type( $attachment_id );
+		return $mime && str_starts_with( $mime, 'video/' );
+	}
+
+	/**
+	 * Renderizar <video> con lazy loading via data-src.
+	 *
+	 * El JS (geoad-rotation.js) activa la carga cuando el elemento
+	 * entra en el viewport (IntersectionObserver, rootMargin 300px).
+	 * Nunca se descarga hasta que el usuario llega a esa zona.
+	 *
+	 * @param int    $video_id  ID attachment del video principal.
+	 * @param int    $mobile_id ID attachment del video/imagen para movil (0 = usa el principal).
+	 * @param string $format    Formato de la zona.
+	 * @return string HTML del video.
+	 */
+	private function render_video( int $video_id, int $mobile_id, string $format ): string {
+		$video_url = wp_get_attachment_url( $video_id );
+		if ( ! $video_url ) {
+			return '';
+		}
+
+		$mime      = get_post_mime_type( $video_id );
+		$w         = $this->get_format_width( $format );
+		$h         = $this->get_format_height( $format );
+
+		ob_start();
+		?>
+		<video class="geoad-video geoad-video-lazy"
+		       muted loop playsinline preload="none"
+		       width="<?php echo esc_attr( $w ); ?>"
+		       height="<?php echo esc_attr( $h ); ?>">
+			<?php
+			// Si hay video movil distinto, prioritizarlo en pantallas pequenas.
+			if ( $mobile_id && $mobile_id !== $video_id && $this->is_video( $mobile_id ) ) :
+				$mobile_url  = wp_get_attachment_url( $mobile_id );
+				$mobile_mime = get_post_mime_type( $mobile_id );
+				?>
+				<source data-src="<?php echo esc_url( $mobile_url ); ?>"
+				        type="<?php echo esc_attr( $mobile_mime ); ?>"
+				        media="(max-width: 767px)">
+			<?php endif; ?>
+			<source data-src="<?php echo esc_url( $video_url ); ?>"
+			        type="<?php echo esc_attr( $mime ); ?>">
+		</video>
 		<?php
 		return ob_get_clean();
 	}
