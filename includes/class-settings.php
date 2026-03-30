@@ -136,6 +136,21 @@ class Settings {
 	private const INJECT_OPTION = 'geogastronomica_inject';
 
 	/**
+	 * Option name para configuracion de rotacion.
+	 */
+	private const ROTATION_OPTION = 'geogastronomica_rotation';
+
+	/**
+	 * Obtener intervalo de rotacion en milisegundos.
+	 *
+	 * @return int Milisegundos entre cambio de banner (default 5000).
+	 */
+	public static function get_rotation_interval(): int {
+		$saved = get_option( self::ROTATION_OPTION, array() );
+		return max( 1000, (int) ( $saved['interval'] ?? 5000 ) );
+	}
+
+	/**
 	 * Obtener config de insercion automatica.
 	 *
 	 * @return array { enabled: bool, injections: [ { zone, after } ] }
@@ -227,6 +242,10 @@ class Settings {
 		}
 
 		update_option( self::INJECT_OPTION, $inject_config );
+
+		// Guardar intervalo de rotacion.
+		$interval = max( 1000, (int) ( $_POST['geo_rotation_interval'] ?? 5000 ) );
+		update_option( self::ROTATION_OPTION, array( 'interval' => $interval ) );
 
 		add_settings_error(
 			'geogastronomica',
@@ -357,6 +376,31 @@ class Settings {
 						<?php esc_html_e( 'Maximo 3 puntos. Los articulos con menos parrafos que el numero indicado no reciben insercion.', 'geogastronomica' ); ?>
 					</p>
 				</div>
+
+				<hr style="margin: 32px 0 24px;">
+
+				<h2><?php esc_html_e( 'Comportamiento de banners', 'geogastronomica' ); ?></h2>
+
+				<table class="form-table" role="presentation">
+					<tr>
+						<th scope="row">
+							<label for="geo_rotation_interval">
+								<?php esc_html_e( 'Intervalo de rotacion', 'geogastronomica' ); ?>
+							</label>
+						</th>
+						<td>
+							<input type="number"
+							       id="geo_rotation_interval"
+							       name="geo_rotation_interval"
+							       value="<?php echo esc_attr( Settings::get_rotation_interval() ); ?>"
+							       min="1000" max="60000" step="500"
+							       style="width:100px;">
+							<span class="description">
+								ms &nbsp;(<?php esc_html_e( 'tiempo entre cambios de banner; minimo 1000 ms = 1 segundo', 'geogastronomica' ); ?>)
+							</span>
+						</td>
+					</tr>
+				</table>
 
 				<?php submit_button( esc_html__( 'Guardar ajustes', 'geogastronomica' ) ); ?>
 			</form>

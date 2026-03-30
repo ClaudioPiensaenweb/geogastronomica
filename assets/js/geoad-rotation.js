@@ -12,7 +12,7 @@
 (function () {
 	'use strict';
 
-	var INTERVAL_MS  = 5000;
+	var INTERVAL_MS  = (window.geoAdConfig && window.geoAdConfig.interval) || 5000;
 	var DISMISS_KEY  = 'geoad_sticky_dismissed';
 	var VIDEO_MARGIN = '300px'; // Precargar 300px antes del viewport.
 
