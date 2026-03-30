@@ -4,24 +4,55 @@
  * @package GeoGastronomica
  */
 
+/* ─── Contenedor de zona ──────────────────────────────────────────────────
+   width: 100% para llenar el contenedor padre siempre.
+   height: calculada por el navegador via aspect-ratio + width.
+   overflow: hidden para recortar imagenes que no encajen exactamente.
+*/
 .geoad-zone {
 	position: relative;
+	display: block;
 	overflow: hidden;
 	width: 100%;
 }
 
-.geoad-zone img {
-	display: block;
-	width: 100%;
-	height: auto;
-	object-fit: cover;
+/* ─── Formatos — desktop ──────────────────────────────────────────────────
+   max-width limita al tamano nativo de la imagen para no pixelar.
+   aspect-ratio mantiene las proporciones al escalar.
+*/
+.geoad-zone--vertical {
+	max-width: 285px;
+	aspect-ratio: 285 / 627;
 }
 
-/* Banner stacking para rotacion */
+.geoad-zone--horizontal {
+	max-width: 100%;
+	aspect-ratio: 1230 / 350;
+}
+
+/* ─── Movil ───────────────────────────────────────────────────────────────
+   Ambos formatos pasan a 5:2 (proporcion de la imagen movil 1000x400).
+   Sin inline style en el HTML que pueda sobreescribir esto.
+*/
+@media (max-width: 767px) {
+	.geoad-zone--vertical,
+	.geoad-zone--horizontal {
+		max-width: 100%;
+		aspect-ratio: 5 / 2;
+	}
+
+	.geoad-zone--vertical {
+		max-height: 180px;
+	}
+}
+
+/* ─── Banner individual (stacking para rotacion) ──────────────────────────
+   Todos los banners son absolute: la zona obtiene su altura del aspect-ratio,
+   no del contenido. Esto garantiza que 1 o N banners se comportan igual.
+*/
 .geoad-banner {
 	position: absolute;
-	top: 0;
-	left: 0;
+	inset: 0;          /* shorthand de top/right/bottom/left: 0 */
 	width: 100%;
 	height: 100%;
 	opacity: 0;
@@ -29,69 +60,39 @@
 	z-index: 1;
 }
 
-.geoad-banner.active {
-	opacity: 1;
-	z-index: 2;
-}
-
-/* Solo un banner = visible sin cambiar posicionamiento */
+.geoad-banner.active,
 .geoad-zone .geoad-banner:only-child {
 	opacity: 1;
 	z-index: 2;
 }
 
-/* Formato vertical — desktop */
-.geoad-zone--vertical {
-	max-width: 285px;
-	aspect-ratio: 285 / 627;
-}
-
-/* Formato horizontal — desktop */
-.geoad-zone--horizontal {
-	max-width: 1230px;
-	aspect-ratio: 1230 / 350;
-}
-
-/* Movil: ancho completo, alto proporcional a 1000x400 (ratio 5:2) */
-@media (max-width: 767px) {
-	.geoad-zone--horizontal {
-		max-width: 100%;
-		aspect-ratio: 5 / 2;
-	}
-
-	.geoad-zone--vertical {
-		max-width: 100%;
-		aspect-ratio: 5 / 2;
-		max-height: 180px;
-	}
-}
-
-/* Shortcode vacio: el JS inline lo elimina del DOM.
-   Fallback CSS por si el script no ejecuta. */
-.brxe-shortcode:not(:has(.geoad-zone)) {
-	display: none !important;
-}
-
-/* Links dentro de banners */
-.geoad-banner a {
+/* ─── Contenido del banner ────────────────────────────────────────────────
+   Todos los descendientes directos deben llenar 100% del banner.
+   Usamos .geoad-banner > * para no depender de si hay <a> o no.
+   picture necesita display:block para aceptar width/height.
+*/
+.geoad-banner > a {
 	display: block;
 	width: 100%;
 	height: 100%;
 }
 
-.geoad-banner a picture,
-.geoad-banner a img {
+.geoad-banner picture,
+.geoad-banner > a picture {
+	display: block;
 	width: 100%;
 	height: 100%;
 }
 
-/* Insercion automatica inline entre parrafos */
-.geoad-inline-inject {
-	margin: 1.5em 0;
+.geoad-banner img,
+.geoad-banner > a img {
+	display: block;
 	width: 100%;
+	height: 100%;
+	object-fit: cover;
 }
 
-/* Video dentro de banners */
+/* ─── Video ───────────────────────────────────────────────────────────────*/
 .geoad-video {
 	display: block;
 	width: 100%;
@@ -99,7 +100,22 @@
 	object-fit: cover;
 }
 
-/* Sticky bottom — solo movil */
+/* ─── Shortcode wrapper vacio ────────────────────────────────────────────
+   El JS elimina el wrapper del DOM. Este CSS es fallback por si el script
+   no ejecuta (ej: JS desactivado, CSP estricto).
+*/
+.brxe-shortcode:not(:has(.geoad-zone)) {
+	display: none !important;
+}
+
+/* ─── Insercion automatica inline entre parrafos ─────────────────────────*/
+.geoad-inline-inject {
+	clear: both;
+	margin: 1.5em 0;
+	width: 100%;
+}
+
+/* ─── Sticky bottom — solo movil ─────────────────────────────────────────*/
 @media (max-width: 767px) {
 	.geoad-zone--sticky-bottom {
 		position: fixed;
@@ -111,13 +127,10 @@
 		background: #fff;
 		box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.18);
 		overflow: visible;
-		/* Ignorar aspect-ratio del formato base en sticky */
 		aspect-ratio: unset !important;
 	}
 
 	.geoad-zone--sticky-bottom .geoad-banner {
-		position: relative;
-		height: 90px;
 		opacity: 1;
 		z-index: 2;
 	}
@@ -127,7 +140,7 @@
 	}
 }
 
-/* Boton cerrar sticky (oculto en desktop) */
+/* Boton cerrar sticky */
 .geoad-sticky-close {
 	display: none;
 	position: absolute;
@@ -140,7 +153,6 @@
 	border: none;
 	border-radius: 50%;
 	font-size: 16px;
-	line-height: 1;
 	cursor: pointer;
 	padding: 0;
 	z-index: 9991;
