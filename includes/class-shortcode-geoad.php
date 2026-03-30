@@ -511,6 +511,13 @@ class Shortcode_GeoAd {
 			return;
 		}
 		wp_enqueue_style( 'geoad-frontend' );
+		wp_add_inline_script(
+			'geoad-rotation',
+			'window.geoAdConfig = ' . wp_json_encode( array(
+				'interval' => Settings::get_rotation_interval(),
+			) ) . ';',
+			'before'
+		);
 		$this->assets_enqueued = true;
 	}
 }
