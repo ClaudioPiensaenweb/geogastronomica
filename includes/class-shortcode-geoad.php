@@ -313,8 +313,7 @@ class Shortcode_GeoAd {
 		ob_start();
 		?>
 		<div class="geoad-zone geoad-zone--<?php echo esc_attr( $format ); ?><?php echo $sticky_class; ?>"
-		     data-zone="<?php echo esc_attr( $zone ); ?>"
-		     style="aspect-ratio: <?php echo esc_attr( self::ASPECT_RATIOS[ $format ] ?? '16 / 9' ); ?>">
+		     data-zone="<?php echo esc_attr( $zone ); ?>">
 			<?php if ( $sticky ) : ?>
 				<button class="geoad-sticky-close" aria-label="<?php esc_attr_e( 'Cerrar anuncio', 'geogastronomica' ); ?>">
 					<span aria-hidden="true">&times;</span>
