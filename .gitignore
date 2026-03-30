@@ -28,5 +28,4 @@ Thumbs.db
 *.sql.gz
 
 # === Desarrollo interno ===
-.planning/
 CLAUDE.md

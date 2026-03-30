@@ -1,0 +1,22 @@
+{
+  "proyecto": {
+    "nombre": "GeoGastronomica Plugin",
+    "tipo": "wordpress-plugin",
+    "cliente": "GeoGastronomica",
+    "repo": "https://github.com/ClaudioPiensaenweb/geogastronomica",
+    "version_actual": "1.9.9"
+  },
+  "stack": {
+    "lenguaje": "PHP 8.0+",
+    "plataforma": "WordPress 6.0+",
+    "builder": "Bricks Builder",
+    "dependencias": ["plugin-update-checker/v5p6"],
+    "assets": ["CSS vanilla", "JS vanilla"],
+    "ci": "GitHub Actions",
+    "deploy": "ZIP via GitHub Releases → Plugin Update Checker"
+  },
+  "entorno": {
+    "local": "C:/Users/Piensaenweb/Documents/Claude/geogastronomica",
+    "produccion": "geogastronomica.com (Plesk)"
+  }
+}
