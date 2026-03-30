@@ -5,6 +5,7 @@ vendor/
 # === Build ===
 dist/
 build/
+*.zip
 
 # === Entorno ===
 .env
@@ -26,9 +27,6 @@ Thumbs.db
 *.sql
 *.sql.gz
 
-# ============================================
-# NO EXCLUIR — .planning/ viaja con el repo
-# Es lo que permite que cualquier dev pueda
-# continuar el proyecto sin preguntar a nadie.
-# ============================================
-# .planning/    <- NUNCA descomentar esta linea
+# === Desarrollo interno ===
+.planning/
+CLAUDE.md
