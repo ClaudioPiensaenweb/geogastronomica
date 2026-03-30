@@ -85,6 +85,12 @@
 	height: 100%;
 }
 
+/* Insercion automatica inline entre parrafos */
+.geoad-inline-inject {
+	margin: 1.5em 0;
+	width: 100%;
+}
+
 /* Video dentro de banners */
 .geoad-video {
 	display: block;

@@ -131,6 +131,27 @@ class Settings {
 	}
 
 	/**
+	 * Option name para la insercion automatica.
+	 */
+	private const INJECT_OPTION = 'geogastronomica_inject';
+
+	/**
+	 * Obtener config de insercion automatica.
+	 *
+	 * @return array { enabled: bool, injections: [ { zone, after } ] }
+	 */
+	public static function get_inject_config(): array {
+		$default = array(
+			'enabled'    => false,
+			'injections' => array(
+				array( 'zone' => 'subcategoria_horizontal_1', 'after' => 3 ),
+			),
+		);
+		$saved = get_option( self::INJECT_OPTION, array() );
+		return wp_parse_args( $saved, $default );
+	}
+
+	/**
 	 * Guardar ajustes via POST.
 	 */
 	public function handle_save(): void {
@@ -174,6 +195,34 @@ class Settings {
 		}
 
 		update_option( self::PACKS_OPTION, $packs );
+
+		// Guardar config de insercion automatica.
+		$all_zones = array();
+		foreach ( self::AVAILABLE_ZONES as $page => $slots ) {
+			foreach ( $slots as $slot ) {
+				$all_zones[] = $page . '_' . $slot;
+			}
+		}
+
+		$inject_config = array(
+			'enabled'    => ! empty( $_POST['geo_inject_enabled'] ),
+			'injections' => array(),
+		);
+
+		if ( isset( $_POST['geo_inject'] ) && is_array( $_POST['geo_inject'] ) ) {
+			foreach ( $_POST['geo_inject'] as $row ) {
+				$zone  = sanitize_key( $row['zone'] ?? '' );
+				$after = max( 1, min( 20, (int) ( $row['after'] ?? 3 ) ) );
+				if ( $zone && in_array( $zone, $all_zones, true ) ) {
+					$inject_config['injections'][] = array(
+						'zone'  => $zone,
+						'after' => $after,
+					);
+				}
+			}
+		}
+
+		update_option( self::INJECT_OPTION, $inject_config );
 
 		add_settings_error(
 			'geogastronomica',
@@ -226,6 +275,65 @@ class Settings {
 						+ <?php esc_html_e( 'Anadir pack', 'geogastronomica' ); ?>
 					</button>
 				</p>
+
+				<hr style="margin: 32px 0 24px;">
+
+				<h2><?php esc_html_e( 'Insercion automatica en articulos', 'geogastronomica' ); ?></h2>
+				<p class="description">
+					<?php esc_html_e( 'Inyecta un anuncio dentro del contenido de los articulos, despues del parrafo indicado. Solo se inserta si hay anuncios activos para esa zona.', 'geogastronomica' ); ?>
+				</p>
+
+				<?php
+				$inject  = self::get_inject_config();
+				$all_zones = array();
+				foreach ( self::AVAILABLE_ZONES as $page => $slots ) {
+					foreach ( $slots as $slot ) {
+						$all_zones[ $page . '_' . $slot ] = ( self::PAGE_LABELS[ $page ] ?? $page ) . ' — ' . ( self::ZONE_LABELS[ $slot ] ?? $slot );
+					}
+				}
+				?>
+
+				<div class="geo-inject-section">
+					<label class="geo-inject-toggle">
+						<input type="checkbox" name="geo_inject_enabled" value="1"
+						       <?php checked( $inject['enabled'] ); ?>>
+						<strong><?php esc_html_e( 'Activar insercion automatica', 'geogastronomica' ); ?></strong>
+					</label>
+
+					<div id="geo-inject-rows" style="margin-top:16px;">
+						<?php foreach ( $inject['injections'] as $i => $inj ) : ?>
+						<div class="geo-inject-row">
+							<span class="geo-inject-label"><?php esc_html_e( 'Despues del parrafo', 'geogastronomica' ); ?></span>
+							<input type="number" name="geo_inject[<?php echo $i; ?>][after]"
+							       value="<?php echo esc_attr( $inj['after'] ); ?>"
+							       min="1" max="20" style="width:64px;">
+							<span class="geo-inject-label"><?php esc_html_e( 'insertar zona', 'geogastronomica' ); ?></span>
+							<select name="geo_inject[<?php echo $i; ?>][zone]">
+								<?php foreach ( $all_zones as $zkey => $zlabel ) : ?>
+									<option value="<?php echo esc_attr( $zkey ); ?>"
+									        <?php selected( $inj['zone'], $zkey ); ?>>
+										<?php echo esc_html( $zlabel ); ?>
+									</option>
+								<?php endforeach; ?>
+							</select>
+							<button type="button" class="button-link geo-inject-remove" style="color:#b32d2e;">
+								&times; <?php esc_html_e( 'Quitar', 'geogastronomica' ); ?>
+							</button>
+						</div>
+						<?php endforeach; ?>
+					</div>
+
+					<p>
+						<button type="button" id="geo-inject-add" class="button"
+						        <?php echo count( $inject['injections'] ) >= 3 ? 'style="display:none"' : ''; ?>>
+							+ <?php esc_html_e( 'Anadir punto de insercion', 'geogastronomica' ); ?>
+						</button>
+					</p>
+
+					<p class="description">
+						<?php esc_html_e( 'Maximo 3 puntos. Los articulos con menos parrafos que el numero indicado no reciben insercion.', 'geogastronomica' ); ?>
+					</p>
+				</div>
 
 				<?php submit_button( esc_html__( 'Guardar ajustes', 'geogastronomica' ) ); ?>
 			</form>
@@ -294,6 +402,17 @@ class Settings {
 				font-size: 13px;
 			}
 			.geo-zone-column input[type="checkbox"] { margin-right: 6px; }
+
+			/* Insercion automatica */
+			.geo-inject-section { max-width: 680px; }
+			.geo-inject-toggle { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+			.geo-inject-row {
+				display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+				background: #f9f9f9; border: 1px solid #e5e5e5; border-radius: 4px;
+				padding: 10px 14px; margin-bottom: 8px; font-size: 13px;
+			}
+			.geo-inject-label { color: #50575e; }
+			.geo-inject-row select { max-width: 280px; }
 		</style>
 
 		<script>
@@ -330,6 +449,53 @@ class Settings {
 							.replace(/^_|_$/g, '');
 					}
 				}
+			});
+		})();
+
+		// Insercion automatica — anadir/quitar filas.
+		(function() {
+			const MAX_ROWS   = 3;
+			const container  = document.getElementById('geo-inject-rows');
+			const addBtn     = document.getElementById('geo-inject-add');
+			if (!container || !addBtn) return;
+
+			const zoneOptions = `<?php
+				$opts = '';
+				foreach ( $all_zones as $zkey => $zlabel ) {
+					$opts .= '<option value="' . esc_attr( $zkey ) . '">' . esc_html( $zlabel ) . '</option>';
+				}
+				echo $opts;
+			?>`;
+
+			function getRowCount() { return container.querySelectorAll('.geo-inject-row').length; }
+			function reindex() {
+				container.querySelectorAll('.geo-inject-row').forEach(function(row, i) {
+					row.querySelectorAll('[name]').forEach(function(el) {
+						el.name = el.name.replace(/geo_inject\[\d+\]/, 'geo_inject[' + i + ']');
+					});
+				});
+			}
+
+			addBtn.addEventListener('click', function() {
+				if (getRowCount() >= MAX_ROWS) return;
+				const i   = getRowCount();
+				const div = document.createElement('div');
+				div.className = 'geo-inject-row';
+				div.innerHTML =
+					'<span class="geo-inject-label"><?php esc_html_e( 'Despues del parrafo', 'geogastronomica' ); ?></span>' +
+					'<input type="number" name="geo_inject[' + i + '][after]" value="5" min="1" max="20" style="width:64px;">' +
+					'<span class="geo-inject-label"><?php esc_html_e( 'insertar zona', 'geogastronomica' ); ?></span>' +
+					'<select name="geo_inject[' + i + '][zone]">' + zoneOptions + '</select>' +
+					'<button type="button" class="button-link geo-inject-remove" style="color:#b32d2e;">&times; <?php esc_html_e( 'Quitar', 'geogastronomica' ); ?></button>';
+				container.appendChild(div);
+				addBtn.style.display = getRowCount() >= MAX_ROWS ? 'none' : '';
+			});
+
+			container.addEventListener('click', function(e) {
+				if (!e.target.classList.contains('geo-inject-remove')) return;
+				e.target.closest('.geo-inject-row').remove();
+				reindex();
+				addBtn.style.display = getRowCount() >= MAX_ROWS ? 'none' : '';
 			});
 		})();
 		</script>
