@@ -29,6 +29,8 @@
 
 ## Fase 3 — Mejoras pendientes
 
+- ◆ Inserción automática no pegada a imágenes — detectar si el párrafo siguiente es una imagen y saltar al siguiente hueco válido
+- ◆ Check "mostrar badge Publicidad" por anuncio — algunos banners son de la propia web, no publicidad de terceros
 - ▸ Página de comparativa de anuncios — ranking por CTR/impresiones de todos los activos
 - ▸ Exportar estadísticas a CSV (para enviar al anunciante)
 - ▸ Notificación cuando un anuncio cumple el objetivo de impresiones

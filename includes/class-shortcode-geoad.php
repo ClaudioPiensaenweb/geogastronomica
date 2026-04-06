@@ -338,11 +338,23 @@ class Shortcode_GeoAd {
 			$html  .= '</div>';
 			$first  = false;
 		}
-		$privacy_url = Settings::get_label_privacy_url();
-		if ( $privacy_url ) {
-			$html .= '<a class="geoad-label" href="' . esc_url( $privacy_url ) . '" target="_blank" rel="noopener noreferrer nofollow">Publicidad</a>';
-		} else {
-			$html .= '<span class="geoad-label">Publicidad</span>';
+		// Mostrar badge solo si algún anuncio de la zona lo tiene activado.
+		// Si el meta no está guardado (anuncios previos), se asume activo por defecto.
+		$show_label = false;
+		foreach ( $ad_ids as $ad_id ) {
+			$flag = get_post_meta( $ad_id, '_geo_mostrar_publicidad', true );
+			if ( '0' !== $flag ) {
+				$show_label = true;
+				break;
+			}
+		}
+		if ( $show_label ) {
+			$privacy_url = Settings::get_label_privacy_url();
+			if ( $privacy_url ) {
+				$html .= '<a class="geoad-label" href="' . esc_url( $privacy_url ) . '" target="_blank" rel="noopener noreferrer nofollow">Publicidad</a>';
+			} else {
+				$html .= '<span class="geoad-label">Publicidad</span>';
+			}
 		}
 		$html .= '</div>';
 		$html .= '</div>';

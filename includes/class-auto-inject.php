@@ -72,6 +72,7 @@ class Auto_Inject {
 		}
 
 		// Construir mapa: numero_parrafo => html.
+		// Si la posicion target es adyacente a una imagen, desliza al siguiente hueco valido.
 		$inject_map = array();
 		foreach ( $injections as $inj ) {
 			if ( empty( $inj['zone'] ) || empty( $inj['after'] ) ) {
@@ -83,14 +84,26 @@ class Auto_Inject {
 				continue;
 			}
 
-			// Siempre fuerza horizontal: encaja en el flujo de texto
-			// independientemente de si la zona es vertical o horizontal.
+			// Deslizar hasta maximo 4 parrafos si el hueco esta junto a una imagen.
+			$position = $after;
+			$attempts = 0;
+			while ( $attempts < 4 && $position <= $total_paragraphs ) {
+				if ( ! $this->is_adjacent_to_image( $parts, $position - 1 ) ) {
+					break;
+				}
+				$position++;
+				$attempts++;
+			}
+			if ( $position > $total_paragraphs ) {
+				continue; // Sin hueco valido, no inyectar.
+			}
+
 			$html = $this->render_zone( sanitize_key( $inj['zone'] ), $device_class );
 			if ( ! $html ) {
 				continue;
 			}
 
-			$inject_map[ $after ] = ( $inject_map[ $after ] ?? '' ) . $html;
+			$inject_map[ $position ] = ( $inject_map[ $position ] ?? '' ) . $html;
 		}
 
 		if ( empty( $inject_map ) ) {
@@ -110,6 +123,37 @@ class Auto_Inject {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Detectar si una posicion de inyeccion es adyacente a una imagen.
+	 *
+	 * Comprueba dos casos:
+	 * 1. El parrafo actual contiene una imagen (<img> o <figure>).
+	 * 2. El contenido que sigue al parrafo empieza con un bloque de imagen.
+	 *
+	 * Cubre tanto el editor clasico (<p><img...></p>) como Gutenberg
+	 * (<figure class="wp-block-image">, <figure class="wp-block-gallery">).
+	 *
+	 * @param array $parts Array de segmentos del contenido (split por </p>).
+	 * @param int   $index Indice del parrafo tras el que se quiere inyectar.
+	 * @return bool True si la posicion es adyacente a una imagen.
+	 */
+	private function is_adjacent_to_image( array $parts, int $index ): bool {
+		// El parrafo actual contiene una imagen.
+		if ( isset( $parts[ $index ] ) && preg_match( '/<img[\s>]|<figure[\s>]/i', $parts[ $index ] ) ) {
+			return true;
+		}
+
+		// El contenido que sigue empieza con un bloque de imagen (Gutenberg o clasico).
+		if ( isset( $parts[ $index + 1 ] ) ) {
+			$next = ltrim( $parts[ $index + 1 ] );
+			if ( preg_match( '/^<figure[\s>]|^<img[\s>]/i', $next ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

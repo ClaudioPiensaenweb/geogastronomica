@@ -117,6 +117,11 @@ class Meta_Boxes {
 						'type'     => 'number',
 						'sanitize' => 'absint',
 					),
+					'_geo_mostrar_publicidad' => array(
+						'label'    => esc_html__( 'Mostrar badge Publicidad', 'geogastronomica' ),
+						'type'     => 'checkbox',
+						'sanitize' => 'absint',
+					),
 					),
 			),
 		);
@@ -344,6 +349,22 @@ class Meta_Boxes {
 					       min="0" step="1000" class="small-text" style="width:120px;">
 					<span class="geo-priority-hint"><?php esc_html_e( 'impresiones contratadas (0 = sin objetivo)', 'geogastronomica' ); ?></span>
 				</div>
+			</div>
+
+			<!-- Badge legal -->
+			<div class="geo-section">
+				<div class="geo-section-title"><?php esc_html_e( 'Legal', 'geogastronomica' ); ?></div>
+				<p class="geo-section-hint"><?php esc_html_e( 'Desactiva el badge si este banner enlaza a contenido propio y no es publicidad de terceros.', 'geogastronomica' ); ?></p>
+				<?php
+				// Si no tiene valor guardado, por defecto activo (1) — safe para anuncios existentes.
+				$mostrar = get_post_meta( $pid, '_geo_mostrar_publicidad', true );
+				$checked = '' === $mostrar ? true : (bool) $mostrar;
+				?>
+				<label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+					<input type="checkbox" id="_geo_mostrar_publicidad" name="_geo_mostrar_publicidad"
+					       value="1" <?php checked( $checked ); ?>>
+					<span><?php esc_html_e( 'Mostrar badge "Publicidad" en el banner', 'geogastronomica' ); ?></span>
+				</label>
 			</div>
 
 		</div>
