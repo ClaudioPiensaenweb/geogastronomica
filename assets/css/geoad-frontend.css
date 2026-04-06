@@ -164,6 +164,10 @@
 	color: #fff !important;
 }
 
+.geoad-label--hidden {
+	display: none !important;
+}
+
 /* ─── Insercion automatica inline entre parrafos ─────────────────────────*/
 .geoad-inline-inject {
 	clear: both;

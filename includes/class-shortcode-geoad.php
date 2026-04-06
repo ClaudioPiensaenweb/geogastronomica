@@ -325,9 +325,13 @@ class Shortcode_GeoAd {
 		}
 		$first = true;
 		foreach ( $ad_ids as $ad_id ) {
-			$enlace  = get_post_meta( $ad_id, '_geo_enlace', true );
-			$picture = $this->render_picture( $ad_id, $format );
-			$html   .= '<div class="geoad-banner ' . ( $first ? 'active' : '' ) . '" data-ad-id="' . esc_attr( $ad_id ) . '">';
+			$enlace        = get_post_meta( $ad_id, '_geo_enlace', true );
+			$picture       = $this->render_picture( $ad_id, $format );
+			$flag          = get_post_meta( $ad_id, '_geo_mostrar_publicidad', true );
+			$mostrar_badge = ( '0' === $flag ) ? '0' : '1';
+			$html         .= '<div class="geoad-banner ' . ( $first ? 'active' : '' ) . '"';
+			$html         .= ' data-ad-id="' . esc_attr( $ad_id ) . '"';
+			$html         .= ' data-mostrar-publicidad="' . $mostrar_badge . '">';
 			if ( $enlace ) {
 				$html .= '<a href="' . esc_url( $enlace ) . '" target="_blank" rel="noopener noreferrer">';
 			}
@@ -338,23 +342,16 @@ class Shortcode_GeoAd {
 			$html  .= '</div>';
 			$first  = false;
 		}
-		// Mostrar badge solo si algún anuncio de la zona lo tiene activado.
-		// Si el meta no está guardado (anuncios previos), se asume activo por defecto.
-		$show_label = false;
-		foreach ( $ad_ids as $ad_id ) {
-			$flag = get_post_meta( $ad_id, '_geo_mostrar_publicidad', true );
-			if ( '0' !== $flag ) {
-				$show_label = true;
-				break;
-			}
-		}
-		if ( $show_label ) {
-			$privacy_url = Settings::get_label_privacy_url();
-			if ( $privacy_url ) {
-				$html .= '<a class="geoad-label" href="' . esc_url( $privacy_url ) . '" target="_blank" rel="noopener noreferrer nofollow">Publicidad</a>';
-			} else {
-				$html .= '<span class="geoad-label">Publicidad</span>';
-			}
+		// El label siempre se renderiza — el JS lo muestra/oculta en cada rotacion
+		// segun data-mostrar-publicidad del banner activo.
+		// La clase inicial se calcula desde el primer banner para evitar parpadeo.
+		$first_flag    = get_post_meta( $ad_ids[0], '_geo_mostrar_publicidad', true );
+		$label_hidden  = ( '0' === $first_flag ) ? ' geoad-label--hidden' : '';
+		$privacy_url   = Settings::get_label_privacy_url();
+		if ( $privacy_url ) {
+			$html .= '<a class="geoad-label' . $label_hidden . '" href="' . esc_url( $privacy_url ) . '" target="_blank" rel="noopener noreferrer nofollow">Publicidad</a>';
+		} else {
+			$html .= '<span class="geoad-label' . $label_hidden . '">Publicidad</span>';
 		}
 		$html .= '</div>';
 		$html .= '</div>';
