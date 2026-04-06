@@ -44,3 +44,11 @@
 - ○ Histórico de estadísticas más allá de 30 días (retención configurable)
 - ○ API REST para consultar estadísticas desde fuera de WordPress
 - ○ Soporte multisite
+
+---
+
+## PW Compresor (plugin separado)
+
+- ✓ v1.1.0 — GIFs excluidos, borrado del original, no convierte si WebP pesa más
+- ▸ Bulk processing — procesar imágenes existentes en la biblioteca
+- ▸ Limpieza de thumbnails — borrar los .jpg/.png de los tamaños generados por WP
