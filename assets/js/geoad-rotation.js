@@ -22,6 +22,16 @@
 		var banners = zone.querySelectorAll('.geoad-banner');
 		if (banners.length <= 1) return;
 
+		// Buscar el label dentro del mismo geoad-wrap que contiene la zona.
+		var wrap  = zone.closest('.geoad-wrap');
+		var label = wrap ? wrap.querySelector('.geoad-label') : null;
+
+		function syncLabel(banner) {
+			if (!label) return;
+			var show = banner.dataset.mostrarPublicidad !== '0';
+			label.classList.toggle('geoad-label--hidden', !show);
+		}
+
 		var state = {
 			current : 0,
 			total   : banners.length,
@@ -33,6 +43,7 @@
 			banners[state.current].classList.remove('active');
 			state.current = (state.current + 1) % state.total;
 			banners[state.current].classList.add('active');
+			syncLabel(banners[state.current]);
 			scheduleNext();
 		}
 
