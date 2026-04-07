@@ -60,6 +60,12 @@ class Cron_Manager {
 				'no_found_rows'  => true,
 				'fields'         => 'ids',
 				'meta_query'     => array(
+					'relation' => 'AND',
+					array(
+						'key'     => '_geo_fecha_fin',
+						'value'   => '',
+						'compare' => '!=',
+					),
 					array(
 						'key'     => '_geo_fecha_fin',
 						'value'   => $today,
