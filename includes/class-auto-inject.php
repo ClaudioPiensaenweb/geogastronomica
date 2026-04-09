@@ -117,7 +117,18 @@ class Auto_Inject {
 				$result .= '</p>';
 				$paragraph_number = $i + 1;
 				if ( isset( $inject_map[ $paragraph_number ] ) ) {
-					$result .= $inject_map[ $paragraph_number ];
+					// Guardia final: aunque el mapa diga "inyecta aqui", si el segmento
+					// siguiente empieza con una etiqueta de cierre de bloque significa que
+					// el </p> que acabamos de escribir pertenecia al interior de ese bloque
+					// (blockquote, td, li, etc.) y el banner quedaría dentro de el.
+					$following = ltrim( $parts[ $i + 1 ] ?? '' );
+					$inside_block = (bool) preg_match(
+						'/^<\/(?:blockquote|td|th|li|dt|dd|caption|cite|figure)/i',
+						$following
+					);
+					if ( ! $inside_block ) {
+						$result .= $inject_map[ $paragraph_number ];
+					}
 				}
 			}
 		}
