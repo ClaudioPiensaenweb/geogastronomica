@@ -7,22 +7,21 @@
 
 ## Fase actual
 
-**Fase 3 en progreso** — Estabilización de bugs de producción
+**Fase 3 en progreso** — Mejoras y estabilización de producción
 
-La sesión de hoy ha sido de corrección de bugs reportados por el cliente tras el despliegue.
-Versión actual: **v2.0.4**
+Versión actual: **v2.0.6**
 
 ## Progreso
 
 `█████████████████████░░░` ~87% del producto mínimo viable
 
-- **Completadas**: Fase 1 completa, Fase 2 completa, 2 tareas de Fase 3, + 4 hotfixes de producción
+- **Completadas**: Fase 1 completa, Fase 2 completa, 2 tareas de Fase 3, + 6 hotfixes de producción (v2.0.1→v2.0.6)
 - **En progreso**: ninguna
-- **Pendientes**: resto de Fase 3 y Fase 4
+- **Pendientes**: 6 tareas de Fase 3 + Fase 4 completa
 
 ## Qué se hizo hoy (2026-04-09)
 
-### Hotfixes de producción
+### Hotfixes de producción (reportados por el cliente)
 
 - ✓ **v2.0.2** — Bug crítico: anuncios sin fecha fin se desactivaban solos cada noche.
   Causa: el cron comparaba `_geo_fecha_fin` vacío con `< hoy` en MySQL y `'' < '2026-04-09'` = true.
@@ -34,18 +33,30 @@ Versión actual: **v2.0.4**
     Fix: `.geoad-zone .geoad-label.geoad-label--hidden` (0,3,0).
   - Admin: campo de video en meta box aparecía vacío al reabrir el anuncio.
     Causa: `wp_get_attachment_image_url()` devuelve `false` para videos.
-    El valor SÍ se guardaba, solo faltaba feedback visual.
     Fix: `get_post_mime_type()` + icono dashicon en las tarjetas de imagen.
   - Auto-inject: banners se inyectaban dentro de blockquotes (`<blockquote>`).
     Causa: `explode('</p>', $content)` parte el `</p>` interior del blockquote.
-    Fix: `is_adjacent_to_image()` ahora detecta `<blockquote` en parte actual y `</blockquote` en siguiente.
+    Fix: `is_adjacent_to_image()` detecta `<blockquote` en parte actual y `</blockquote` en siguiente.
 
 - ✓ **v2.0.4** — Dos fixes:
-  - Vista previa de video en sección "Formatos" del admin (el mismo problema de v2.0.3
-    pero en la sección inferior de preview). Ahora renderiza `<video>` real con controles.
+  - Vista previa de video en sección "Formatos" del admin. Ahora renderiza `<video>` real con controles.
   - Badge "Publicidad" ahora es **oculto por defecto** — solo se muestra si
     `_geo_mostrar_publicidad = '1'` explícitamente. Antes, vacío = mostrar (causaba
     que todos los anuncios mostraran el badge hasta ser editados manualmente).
+
+- ✓ **v2.0.5** — Guardia de salida en auto-inject:
+  - Añadida comprobación final en el bucle de ensamblado de `inject()`.
+  - Si el segmento siguiente empieza con etiqueta de cierre de bloque (`</blockquote>`,
+    `</td>`, `</li>`, `</th>`, `</dt>`, `</dd>`, `</caption>`, `</cite>`, `</figure>`),
+    no se inyecta aunque el mapa diga que sí.
+  - Belt-and-suspenders sobre la lógica de pre-cálculo de v2.0.3.
+
+- ✓ **v2.0.6** — Fix sliding demasiado agresivo en auto-inject:
+  - `is_adjacent_to_image()` bloqueaba cuando `$parts[$index]` empezaba con `<figure>`.
+  - Ese figura estaba ANTES del párrafo actual (entre el anterior y el actual),
+    no entre el párrafo actual y el punto de inyección.
+  - Fix: eliminado `<figure[\s>]` del primer check. Solo `<blockquote` bloquea en
+    `$parts[$index]`. Las imágenes que bloquean deben estar en `$parts[$index+1]`.
 
 ## Siguiente tarea recomendada
 
@@ -56,13 +67,22 @@ Otras pendientes en Fase 3:
 - Exportar estadísticas a CSV
 - Notificación cuando un anuncio cumple el objetivo de impresiones
 - Caducidad automática al llegar a impresiones contratadas
+- Soporte para formato cuadrado (redes sociales / sidebar)
+- Preview del banner en el shortcode (admin-only overlay)
 - ⚠️ Bug latente: `aggregate_and_purge()` borra datos >30 días, lo que hace que
   "Total acumulado" en el meta box de estadísticas sea engañoso para campañas largas.
   Fix pendiente: acumular en post_meta antes de purgar.
 
-## Notas para el siguiente dev
+## Notas del dev saliente
 
-### Bugs encontrados y corregidos en producción (patrones importantes)
+> Autor: alexPiensaenweb
+> Fecha: 2026-04-09
+
+Sin notas adicionales. Toda la información está en los documentos de .planning/.
+
+---
+
+## Bugs encontrados y corregidos en producción (patrones importantes)
 
 1. **Comparaciones de fecha en MySQL con strings vacíos**: nunca usar `meta_query` con
    `type: DATE` cuando el campo puede estar vacío. MySQL evalúa `'' < '2026-04-09'` = true.
@@ -78,10 +98,19 @@ Otras pendientes en Fase 3:
    y `wp_get_attachment_url()` para obtener la URL del video.
 
 4. **Auto-inject y `explode('</p>')`**: el split parte cualquier `</p>` en el contenido,
-   incluidos los que están dentro de `<blockquote>`, `<td>`, `<li>`. Comprobar siempre
-   si el segmento siguiente empieza con una etiqueta de cierre de bloque.
+   incluidos los que están dentro de `<blockquote>`, `<td>`, `<li>`. Hay dos capas de
+   protección:
+   - Pre-cálculo: `is_adjacent_to_image()` detecta blockquotes y lo excluye del mapa.
+   - Salida: guardia en el bucle de ensamblado que comprueba el segmento siguiente.
 
-### Arquitectura clave
+5. **`is_adjacent_to_image()` — qué segmento mirar**:
+   - `$parts[$index]` = contenido DESDE el `</p>` anterior HASTA el `</p>` actual.
+     Una `<figure>` al INICIO de este segmento quedó entre el párrafo anterior y el actual,
+     no entre el actual y el punto de inyección. Solo `<blockquote` bloquea aquí.
+   - `$parts[$index+1]` = lo que viene DESPUÉS del punto de inyección. Aquí sí hay
+     que comprobar `<figure>`, `<img>`, `</blockquote>`.
+
+## Arquitectura clave
 
 **Flujo de release** (nunca saltarte esto):
 ```
@@ -109,7 +138,7 @@ concatenación de strings (`$html .= '...'`).
 ⚠️ El cron `geo_aggregate_stats` purga datos >30 días, lo que afecta al "Total acumulado".
 Pendiente de fix.
 
-### Archivos principales
+## Archivos principales
 
 | Archivo | Para qué |
 |---|---|
@@ -124,7 +153,7 @@ Pendiente de fix.
 | `.github/workflows/release.yml` | CI/CD — genera ZIP en cada tag |
 | `build-zip.py` | Empaquetado (excluye archivos de desarrollo) |
 
-### Decisiones no obvias
+## Decisiones no obvias
 
 1. **`position: absolute` en `.geoad-banner`**: banners inactivos en absolute + `opacity: 0`.
    Evita el salto de layout al rotar.
