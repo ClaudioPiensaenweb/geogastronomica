@@ -287,8 +287,17 @@ class Meta_Boxes {
 				<div class="geo-section-title"><?php esc_html_e( 'Vista previa', 'geogastronomica' ); ?></div>
 				<div class="geo-preview-grid">
 					<?php foreach ( $formats as $fmt => $fdata ) :
-						$att_id  = (int) get_post_meta( $post->ID, $fdata['key'], true );
-						$img_url = $att_id ? wp_get_attachment_image_url( $att_id, 'large' ) : '';
+						$att_id   = (int) get_post_meta( $post->ID, $fdata['key'], true );
+						$img_url  = $att_id ? wp_get_attachment_image_url( $att_id, 'large' ) : '';
+						$vid_url  = '';
+						$vid_mime = '';
+						if ( $att_id && ! $img_url ) {
+							$mime = (string) get_post_mime_type( $att_id );
+							if ( str_starts_with( $mime, 'video/' ) ) {
+								$vid_url  = (string) wp_get_attachment_url( $att_id );
+								$vid_mime = $mime;
+							}
+						}
 					?>
 					<div class="geo-preview-box">
 						<div class="geo-preview-label"><?php echo esc_html( $fdata['label'] ); ?></div>
@@ -296,6 +305,10 @@ class Meta_Boxes {
 						     style="aspect-ratio:<?php echo esc_attr( $fdata['ratio'] ); ?>;">
 							<?php if ( $img_url ) : ?>
 								<img src="<?php echo esc_url( $img_url ); ?>" alt="">
+							<?php elseif ( $vid_url ) : ?>
+								<video src="<?php echo esc_url( $vid_url ); ?>"
+								       style="width:100%;height:100%;object-fit:cover;"
+								       muted controls preload="metadata"></video>
 							<?php else : ?>
 								<span class="geo-preview-empty"><?php echo esc_html( str_replace( '/', ' × ', $fdata['ratio'] ) ); ?></span>
 							<?php endif; ?>
@@ -363,9 +376,9 @@ class Meta_Boxes {
 				<div class="geo-section-title"><?php esc_html_e( 'Legal', 'geogastronomica' ); ?></div>
 				<p class="geo-section-hint"><?php esc_html_e( 'Desactiva el badge si este banner enlaza a contenido propio y no es publicidad de terceros.', 'geogastronomica' ); ?></p>
 				<?php
-				// Si no tiene valor guardado, por defecto activo (1) — safe para anuncios existentes.
+				// Si no tiene valor guardado, por defecto oculto (0).
 				$mostrar = get_post_meta( $pid, '_geo_mostrar_publicidad', true );
-				$checked = '' === $mostrar ? true : (bool) $mostrar;
+				$checked = '1' === (string) $mostrar;
 				?>
 				<label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
 					<input type="checkbox" id="_geo_mostrar_publicidad" name="_geo_mostrar_publicidad"

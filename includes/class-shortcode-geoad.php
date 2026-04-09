@@ -328,7 +328,7 @@ class Shortcode_GeoAd {
 			$enlace        = get_post_meta( $ad_id, '_geo_enlace', true );
 			$picture       = $this->render_picture( $ad_id, $format );
 			$flag          = get_post_meta( $ad_id, '_geo_mostrar_publicidad', true );
-			$mostrar_badge = ( '0' === $flag ) ? '0' : '1';
+			$mostrar_badge = ( '1' === (string) $flag ) ? '1' : '0';
 			$html         .= '<div class="geoad-banner ' . ( $first ? 'active' : '' ) . '"';
 			$html         .= ' data-ad-id="' . esc_attr( $ad_id ) . '"';
 			$html         .= ' data-mostrar-publicidad="' . $mostrar_badge . '">';
@@ -346,7 +346,7 @@ class Shortcode_GeoAd {
 		// segun data-mostrar-publicidad del banner activo.
 		// La clase inicial se calcula desde el primer banner para evitar parpadeo.
 		$first_flag    = get_post_meta( $ad_ids[0], '_geo_mostrar_publicidad', true );
-		$label_hidden  = ( '0' === $first_flag ) ? ' geoad-label--hidden' : '';
+		$label_hidden  = ( '1' === (string) $first_flag ) ? '' : ' geoad-label--hidden';
 		$privacy_url   = Settings::get_label_privacy_url();
 		if ( $privacy_url ) {
 			$html .= '<a class="geoad-label' . $label_hidden . '" href="' . esc_url( $privacy_url ) . '" target="_blank" rel="noopener noreferrer nofollow">Publicidad</a>';
