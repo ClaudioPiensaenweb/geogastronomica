@@ -164,7 +164,7 @@
 	color: #fff !important;
 }
 
-.geoad-label--hidden {
+.geoad-zone .geoad-label.geoad-label--hidden {
 	display: none !important;
 }
 

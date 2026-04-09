@@ -242,8 +242,10 @@ class Meta_Boxes {
 					'_geo_imagen_movil'      => $fields['_geo_imagen_movil'],
 				);
 				foreach ( $image_fields as $meta_key => $field ) :
-					$value = get_post_meta( $post->ID, $meta_key, true );
+					$value     = get_post_meta( $post->ID, $meta_key, true );
 					$image_url = $value ? wp_get_attachment_image_url( (int) $value, 'medium' ) : '';
+					$is_video  = $value && ! $image_url
+						&& str_starts_with( (string) get_post_mime_type( (int) $value ), 'video/' );
 					?>
 					<div class="geo-image-card">
 						<div class="geo-image-card-title"><?php echo esc_html( $field['label'] ); ?></div>
@@ -253,6 +255,11 @@ class Meta_Boxes {
 							<div class="geo-image-preview">
 								<?php if ( $image_url ) : ?>
 									<img src="<?php echo esc_url( $image_url ); ?>" alt="">
+								<?php elseif ( $is_video ) : ?>
+									<div class="geo-video-preview geo-video-preview--icon">
+										<span class="dashicons dashicons-video-alt3"></span>
+										<span><?php echo esc_html( get_the_title( (int) $value ) ); ?></span>
+									</div>
 								<?php endif; ?>
 							</div>
 							<div class="geo-image-buttons">
