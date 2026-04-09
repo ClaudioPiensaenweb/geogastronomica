@@ -4,7 +4,7 @@
     "tipo": "wordpress-plugin",
     "cliente": "GeoGastronomica",
     "repo": "https://github.com/ClaudioPiensaenweb/geogastronomica",
-    "version_actual": "1.9.9"
+    "version_actual": "2.0.4"
   },
   "stack": {
     "lenguaje": "PHP 8.0+",
