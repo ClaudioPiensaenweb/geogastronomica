@@ -151,13 +151,17 @@ class Auto_Inject {
 	 * @return bool True si la posicion es adyacente a una imagen.
 	 */
 	private function is_adjacent_to_image( array $parts, int $index ): bool {
-		// El parrafo actual contiene una imagen o abre un blockquote.
-		if ( isset( $parts[ $index ] ) && preg_match( '/<img[\s>]|<figure[\s>]|<blockquote[\s>]/i', $parts[ $index ] ) ) {
+		// El parrafo actual esta DENTRO de un blockquote: la etiqueta de apertura
+		// aparece en este mismo segmento (antes del <p>).
+		// Nota: NO bloqueamos si hay una <figure> al principio del segmento —
+		// esa foto quedo ANTES del parrafo actual, no entre el parrafo y el banner.
+		if ( isset( $parts[ $index ] ) && preg_match( '/<blockquote[\s>]/i', $parts[ $index ] ) ) {
 			return true;
 		}
 
-		// El contenido que sigue empieza con imagen (Gutenberg/clasico) o cierra un blockquote
-		// (lo que significaria que el </p> splitado pertenecia al interior del bloque de cita).
+		// El contenido inmediatamente posterior al punto de inyeccion empieza con
+		// un bloque de imagen (el banner quedaria pegado a la foto) o cierra un
+		// blockquote (estariamos inyectando dentro de el).
 		if ( isset( $parts[ $index + 1 ] ) ) {
 			$next = ltrim( $parts[ $index + 1 ] );
 			if ( preg_match( '/^<figure[\s>]|^<img[\s>]|^<\/blockquote/i', $next ) ) {
