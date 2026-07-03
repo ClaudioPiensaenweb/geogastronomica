@@ -32,12 +32,25 @@
 	aspect-ratio: 1230 / 350;
 }
 
+/* ─── Tablet / una columna ────────────────────────────────────────────────
+   La zona vertical pasa a 5:2 (creativo movil) cuando la parrilla de la
+   portada colapsa a una columna (<=991px): una columna vertical estrecha
+   a ancho completo no tiene sentido. Este breakpoint debe coincidir con
+   el media query del <source> movil que genera el shortcode
+   (Shortcode_GeoAd::get_mobile_media_query).
+*/
+@media (max-width: 991px) {
+	.geoad-zone--vertical {
+		max-width: 100%;
+		aspect-ratio: 5 / 2;
+	}
+}
+
 /* ─── Movil ───────────────────────────────────────────────────────────────
-   Ambos formatos pasan a 5:2 (proporcion de la imagen movil 1000x400).
+   El formato horizontal pasa a 5:2 (proporcion de la imagen movil 1000x400).
    Sin inline style en el HTML que pueda sobreescribir esto.
 */
 @media (max-width: 767px) {
-	.geoad-zone--vertical,
 	.geoad-zone--horizontal {
 		max-width: 100%;
 		aspect-ratio: 5 / 2;

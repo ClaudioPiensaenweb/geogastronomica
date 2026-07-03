@@ -73,6 +73,16 @@
 
 	function activateVideo(video) {
 		video.querySelectorAll('source[data-src]').forEach(function (source) {
+			// Algunos navegadores (Firefox) ignoran el atributo media en
+			// <video><source> y cargarian el primer archivo aunque no toque
+			// (ej: el video movil horizontal en la zona vertical de escritorio).
+			// Se evalua aqui con matchMedia para que la eleccion del archivo
+			// no dependa del soporte nativo del navegador.
+			var media = source.getAttribute('media');
+			if (media && window.matchMedia && !window.matchMedia(media).matches) {
+				source.remove();
+				return;
+			}
 			source.src = source.dataset.src;
 			source.removeAttribute('data-src');
 		});

@@ -397,7 +397,7 @@ class Shortcode_GeoAd {
 		$src = esc_url( $primary_url );
 		$html = '<picture>';
 		if ( $mobile_url && $mobile_id !== $primary_id ) {
-			$html .= '<source media="(max-width: 767px)" srcset="' . esc_url( $mobile_url ) . '">';
+			$html .= '<source media="' . esc_attr( $this->get_mobile_media_query( $format ) ) . '" srcset="' . esc_url( $mobile_url ) . '">';
 		}
 		$html .= '<img src="' . $src . '" alt="' . $alt . '" loading="lazy" width="' . $w . '" height="' . $h . '">';
 		$html .= '</picture>';
@@ -451,13 +451,32 @@ class Shortcode_GeoAd {
 				?>
 				<source data-src="<?php echo esc_url( $mobile_url ); ?>"
 				        type="<?php echo esc_attr( $mobile_mime ); ?>"
-				        media="(max-width: 767px)">
+				        media="<?php echo esc_attr( $this->get_mobile_media_query( $format ) ); ?>">
 			<?php endif; ?>
 			<source data-src="<?php echo esc_url( $video_url ); ?>"
 			        type="<?php echo esc_attr( $mime ); ?>">
 		</video>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Media query del creativo movil segun el formato de la zona.
+	 *
+	 * La zona vertical pasa a formato 5:2 cuando la parrilla colapsa a una
+	 * columna (<=991px), asi que su creativo movil debe activarse en el
+	 * mismo punto que el CSS (geoad-frontend.css). El resto de formatos
+	 * cambia en el breakpoint movil estandar.
+	 *
+	 * Nota: el atributo media en <video><source> no lo respetan todos los
+	 * navegadores (Firefox lo ignora); geoad-rotation.js lo evalua con
+	 * matchMedia al activar el video para que la eleccion sea consistente.
+	 *
+	 * @param string $format Formato de la zona.
+	 * @return string Media query CSS.
+	 */
+	private function get_mobile_media_query( string $format ): string {
+		return 'vertical' === $format ? '(max-width: 991px)' : '(max-width: 767px)';
 	}
 
 	/**
