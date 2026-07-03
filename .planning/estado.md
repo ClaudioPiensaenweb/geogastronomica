@@ -1,6 +1,6 @@
 # Estado del Proyecto — GeoGastronomica Plugin
 
-> Última actualización: 2026-04-09 por alexPiensaenweb
+> Última actualización: 2026-07-03 por alexPiensaenweb
 > Handoff preparado: sí
 
 ---
@@ -9,7 +9,34 @@
 
 **Fase 3 en progreso** — Mejoras y estabilización de producción
 
-Versión actual: **v2.0.6**
+Versión actual: **v2.0.7**
+
+## Qué se hizo el 2026-07-03
+
+### Hotfix v2.0.7 (incidencia reportada por el cliente)
+
+- ✓ **Bug**: video del banner vertical de portada "cortado" en el portátil del cliente
+  (letras del texto cortadas por ambos lados). No reproducible en Chrome/Edge.
+  - **Causa**: Firefox (y navegadores antiguos) **ignoran el atributo `media` en
+    `<video><source>`** (a diferencia de `<picture>`, donde es universal) y cargan
+    el primer source de la lista: el video móvil horizontal (1920×768) dentro de
+    la zona vertical (285×627). `object-fit: cover` lo escala hasta llenar la
+    altura y solo se ve el ~18% central del fotograma → letras cortadas.
+  - **Diagnóstico**: se verificó extrayendo fotogramas de ambos webm — el recorte
+    de la captura del cliente coincidía letra a letra con el centro del video móvil.
+  - **Fix**: `activateVideo()` en geoad-rotation.js evalúa el `media` de cada
+    `<source>` con `window.matchMedia()` y elimina los que no correspondan antes
+    de asignar los `data-src`. La elección ya no depende del soporte del navegador.
+- ✓ **Mejora de breakpoint**: la zona vertical pasa a formato 5:2 (creativo móvil)
+  cuando la parrilla colapsa a una columna (**≤991px**), en vez de mantenerse como
+  columna vertical estrecha. Cambio coordinado en CSS (`geoad-frontend.css`) y en
+  el `media` del `<source>` (`Shortcode_GeoAd::get_mobile_media_query()`):
+  vertical → 991px, resto de formatos → 767px. **Si se cambia uno hay que cambiar
+  el otro.**
+- ✓ **`GeoGastronomica::VERSION` estaba estancada en 2.0.1** — el cache-busting de
+  CSS/JS no se renovaba desde entonces (las releases 2.0.2–2.0.6 salieron con assets
+  potencialmente cacheados). Bump a 2.0.7. **Recordar bumpear la constante además
+  de la cabecera del plugin en cada release.**
 
 ## Progreso
 
